@@ -1,4 +1,4 @@
-#!/usr/bin/evn python3
+#!/usr/bin/env python2.7
 """Process files in an 'incoming' folder by adding them to CouchDB.
 
 This script, which is intended to be run via a cron job, examines the
@@ -6,41 +6,227 @@ contents of a particular directory, looking for content to add to CouchDB.
 The parent directories of any files found are used to assign tags to the
 blobs once the files are stored in CouchDB.
 
-For example, at midnight the script finds that the directory
-/zeniba/shared/incoming contains these directories and files:
+See the project home page for details: https://github.com/nlfiedler/tanuki
 
-joseph_photos_birthday_party/img1.jpg
-joseph_photos_birthday_party/img2.jpg
-joseph_photos_birthday_party/img3.jpg
-christina_photos_school_fieldtrip/image01.jpg
-christina_photos_school_fieldtrip/image02.jpg
-
-The first three would be stored in CouchDB with the tags "joseph",
-"photos", "birthday", "party", while the last two would have the tags
-"christina", "photos", "school", "fieldtrip".
-
-Also use the original file name as one of the tags, to facilitate searching
-for blobs by filename and/or extension.
-
-As each file is processed, remove it from the file system, then delete the
-empty parent directory.
-
-Be sure to ignore all dot files (the Mac creates many).
+Prerequisites:
+* Python 2.7 -- the EXIF libraries all seem to fail miserably on Python 3.x
+* couchdb -- https://github.com/djc/couchdb-python
+* exifread -- https://github.com/ianare/exif-py
 
 """
 
-#
-# TODO: set up CouchDB on the Mac and file server
-# TODO: finish reading http://howistart.org/posts/erlang/1
-# TODO: get the https://github.com/benoitc/couchbeam library
-# TODO: code the thing to do the stuff
-# TODO: delete this silly script once the Erlang version gets off the ground
-#
+import argparse
+import datetime
+import hashlib
+import mimetypes
+import os
+import pwd
+import sys
+
+import couchdb
+import exifread
+
+_DB_NAME = 'tanuki'
+_EXIF_DATETIME = 'EXIF DateTimeOriginal'
+_DATETIME_FORMAT = '%Y-%m-%d %H:%M'
+
+
+def _connect_couch():
+    """Connect to CouchDB or die trying.
+
+    Returns the couchdb.Server instance.
+
+    """
+    couch = couchdb.Server()
+    try:
+        couch.version()
+    except ConnectionRefusedError:
+        sys.stderr.write("Unable to connect to CouchDB at default location.")
+        sys.exit(1)
+    return couch
+
+
+def _create_database(couch):
+    """Create the database for our assets if not already present.
+
+    :param couch: couchdb.Server instance.
+
+    Returns the couchdb.Database instance.
+
+    """
+    if _DB_NAME not in couch:
+        db = couch.create(_DB_NAME)
+    else:
+        db = couch[_DB_NAME]
+    return db
+
+
+def _process_path(dirpath, db, destpath):
+    """Import the assets found with the named path.
+
+    :param dirpath: path to incoming assets.
+    :param db: instance of couchdb.Database.
+    :param destpath: path to asset storage area.
+
+    """
+    utcnow = datetime.datetime.utcnow()
+    importdate = utcnow.strftime(_DATETIME_FORMAT)
+    dirname = os.path.basename(os.path.normpath(dirpath))
+    tags = dirname.split('_')
+    for entry in os.listdir(dirpath):
+        if entry[0] == '.':
+            # Ignore all hidden entries, there are too many to name them all.
+            continue
+        filepath = os.path.join(dirpath, entry)
+        if os.path.isfile(filepath):
+            checksum = _compute_checksum(filepath)
+            doc = dict()
+            doc['exif_date'] = _get_original_date(filepath)
+            doc['file_date'] = _file_date(filepath)
+            doc['file_name'] = entry
+            doc['file_owner'] = _file_owner(filepath)
+            doc['file_size'] = os.stat(filepath).st_size
+            doc['import_date'] = importdate
+            mimetype = mimetypes.guess_type(filepath)
+            doc['mimetype'] = mimetype[0] if mimetype else None
+            doc['sha256'] = checksum
+            doc['tags'] = ",".join(tags)
+            doc_id, doc_rev = db.save(doc)
+            print("{} => id={}, rev={}".format(entry, doc_id, doc_rev))
+            _store_asset(filepath, checksum, destpath)
+        else:
+            print("Ignoring non-file {}".format(entry))
+    if len(os.listdir(dirpath)) == 0:
+        os.rmdir(dirpath)
+
+
+def _compute_checksum(filepath):
+    """Compute the SHA256 for the named file.
+
+    :param filepath: path to file to be read.
+
+    Returns the hex string of the computed checksum.
+
+    """
+    h = hashlib.new('sha256')
+    with open(filepath, 'rb') as fobj:
+        while True:
+            data = fobj.read(4096)
+            if not data:
+                break
+            h.update(data)
+    return h.hexdigest()
+
+
+def _file_owner(filepath):
+    """Return the username of the file owner.
+
+    :param filepath: path to file to be examined.
+
+    Returns the username of the file owner, of None if not available.
+
+    """
+    s = os.stat(filepath)
+    p = pwd.getpwuid(s.st_uid)
+    return p[0] if p else None
+
+
+def _file_date(filepath):
+    """Return the mtime of the file, which is typically when it was created.
+
+    :param filepath: path to file to be examined.
+
+    """
+    s = os.stat(filepath)
+    d = datetime.datetime.utcfromtimestamp(s.st_mtime)
+    return d.strftime(_DATETIME_FORMAT)
+
+
+def _get_original_date(filepath):
+    """Attempt to read the original datetime from the EXIF tags.
+
+    :param filepath: path to file to be read.
+
+    Returns a datetime string (e.g. '2005:08:21 19:19:49') or None.
+
+    """
+    value = None
+    with open(filepath, 'rb') as fobj:
+        tags = exifread.process_file(fobj)
+        if _EXIF_DATETIME in tags:
+            value = tags[_EXIF_DATETIME].values
+    return value
+
+
+def _store_asset(filepath, checksum, destpath):
+    """Move the named asset to its sharded location.
+
+    :param filepath: path to file to be read.
+    :param checksum: the checksum of the file, becomes its new name and path.
+    :param destpath: path to the storage area.
+
+    If an existing asset with the same checksum already exists, the new
+    asset will be ignored.
+
+    """
+    dirname = os.path.join(destpath, checksum[0:2], checksum[2:4])
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    newpath = os.path.join(dirname, checksum[4:])
+    if not os.path.exists(newpath):
+        os.rename(filepath, newpath)
+
+
+def _revert_all(couch, frompath, topath):
+    """Put everything back the way it was.
+
+    :param couch: instance of couchdb.Server.
+    :param frompath: path of stored assets.
+    :param topath: where to put the files with their original names.
+
+    Does not handle filename conflicts. This is only intended for reversing
+    an import that was performed while testing. Presumably the database
+    contains only a small number of documents and thus file names would not
+    be in conflict.
+
+    """
+    db = couch[_DB_NAME]
+    for row in db.view('_all_docs'):
+        doc = db.get(row.id)
+        filename = doc['file_name']
+        sha256 = doc['sha256']
+        fp = os.path.join(frompath, sha256[0:2], sha256[2:4], sha256[4:])
+        tp = os.path.join(topath, filename)
+        os.rename(fp, tp)
+        print("{} => {}".format(filename, topath))
+        db.delete(doc)
 
 
 def main():
-    """Do the thing."""
-    pass
+    """Process incoming assets according to provided arguments."""
+    parser = argparse.ArgumentParser(description="Import assets to tanuki.")
+    parser.add_argument("-p", "--path", required=True,
+                        help="base path of incoming assets")
+    parser.add_argument("-d", "--dest", required=True,
+                        help="base path of asset storage area")
+    parser.add_argument("-r", "--revert", action='store_true',
+                        help="extract everything from CouchDB (oops!)")
+    args = parser.parse_args()
+    if not os.path.exists(args.path):
+        sys.stderr.write("No such directory: {}".format(args.path))
+    couch = _connect_couch()
+    if args.revert:
+        _revert_all(couch, args.dest, args.path)
+    else:
+        db = _create_database(couch)
+        for entry in os.listdir(args.path):
+            fullpath = os.path.join(args.path, entry)
+            if os.path.isfile(fullpath):
+                print("Ignoring file outside of tagged folder: {}".format(entry))
+            elif os.path.isdir(fullpath):
+                _process_path(fullpath, db, args.dest)
+            else:
+                print("Ignoring mystery object {}".format(entry))
 
 
 if __name__ == "__main__":
