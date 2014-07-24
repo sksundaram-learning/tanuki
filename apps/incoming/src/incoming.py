@@ -16,7 +16,7 @@ Prerequisites:
 """
 
 import argparse
-import datetime
+from datetime import datetime
 import hashlib
 import mimetypes
 import os
@@ -69,7 +69,7 @@ def _process_path(dirpath, db, destpath):
     :param destpath: path to asset storage area.
 
     """
-    utcnow = datetime.datetime.utcnow()
+    utcnow = datetime.utcnow()
     importdate = utcnow.strftime(_DATETIME_FORMAT)
     dirname = os.path.basename(os.path.normpath(dirpath))
     tags = ",".join(dirname.lower().split('_'))
@@ -138,7 +138,7 @@ def _file_date(filepath):
 
     """
     s = os.stat(filepath)
-    d = datetime.datetime.utcfromtimestamp(s.st_mtime)
+    d = datetime.utcfromtimestamp(s.st_mtime)
     return d.strftime(_DATETIME_FORMAT)
 
 
@@ -147,7 +147,7 @@ def _get_original_date(filepath):
 
     :param filepath: path to file to be read.
 
-    Returns a datetime string (e.g. '2005:08:21 19:19:49') or None.
+    Returns a datetime string (e.g. '2005-08-21 19:19') or None.
 
     """
     value = None
@@ -155,6 +155,8 @@ def _get_original_date(filepath):
         tags = exifread.process_file(fobj)
         if _EXIF_DATETIME in tags:
             value = tags[_EXIF_DATETIME].values
+            date = datetime.strptime(value, "%Y:%m:%d %H:%M:%S")
+            value = datetime.strftime(date, _DATETIME_FORMAT)
     return value
 
 
