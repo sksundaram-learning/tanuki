@@ -72,7 +72,7 @@ def _process_path(dirpath, db, destpath):
     utcnow = datetime.datetime.utcnow()
     importdate = utcnow.strftime(_DATETIME_FORMAT)
     dirname = os.path.basename(os.path.normpath(dirpath))
-    tags = dirname.split('_')
+    tags = ",".join(dirname.lower().split('_'))
     for entry in os.listdir(dirpath):
         if entry[0] == '.':
             # Ignore all hidden entries, there are too many to name them all.
@@ -90,7 +90,7 @@ def _process_path(dirpath, db, destpath):
             mimetype = mimetypes.guess_type(filepath)
             doc['mimetype'] = mimetype[0] if mimetype else None
             doc['sha256'] = checksum
-            doc['tags'] = ",".join(tags)
+            doc['tags'] = tags
             doc_id, doc_rev = db.save(doc)
             print("{} => id={}, rev={}".format(entry, doc_id, doc_rev))
             _store_asset(filepath, checksum, destpath)
