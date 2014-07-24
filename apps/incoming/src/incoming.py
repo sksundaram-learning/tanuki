@@ -29,6 +29,7 @@ import exifread
 _DB_NAME = 'tanuki'
 _EXIF_DATETIME = 'EXIF DateTimeOriginal'
 _DATETIME_FORMAT = '%Y-%m-%d %H:%M'
+_EXTRANEOUS_FILES = ['.DS_Store', '.localized']
 
 
 def _connect_couch():
@@ -74,11 +75,14 @@ def _process_path(dirpath, db, destpath):
     dirname = os.path.basename(os.path.normpath(dirpath))
     tags = ",".join(dirname.lower().split('_'))
     for entry in os.listdir(dirpath):
-        if entry[0] == '.':
-            # Ignore all hidden entries, there are too many to name them all.
-            continue
         filepath = os.path.join(dirpath, entry)
-        if os.path.isfile(filepath):
+        if entry in _EXTRANEOUS_FILES:
+            # Remove the superfluous files that Mac likes to create.
+            os.unlink(filepath)
+        elif entry[0] == '.':
+            # Ignore all other hidden entries.
+            continue
+        elif os.path.isfile(filepath):
             checksum = _compute_checksum(filepath)
             doc = dict()
             doc['exif_date'] = _get_original_date(filepath)
@@ -98,6 +102,8 @@ def _process_path(dirpath, db, destpath):
             print("Ignoring non-file {}".format(entry))
     if len(os.listdir(dirpath)) == 0:
         os.rmdir(dirpath)
+    else:
+        print("Unable to remove non-empty directory: {}".format(dirname))
 
 
 def _compute_checksum(filepath):
