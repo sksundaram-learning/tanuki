@@ -25,3 +25,10 @@
     * Display assets by tag
     * Display assets by date (with pagination?)
     * Display a single asset
+
+## Incoming Processor
+
+### Installation and Configuration
+
+* Having a `tanuki` user is a good idea for file ownership and permissions.
+* The incoming processor and web stack should run as the tanuki user.

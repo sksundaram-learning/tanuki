@@ -48,5 +48,17 @@ $ pfexec pip2.7 install exifread
 * Set up a crontab entry to run the incoming.py script at midnight (_note: server uses UTC_).
 
 ```
-8 0 * * * /usr/local/bin/incoming.py -p /zeniba/shared/incoming -d /zeniba/shared/tanuki
+8 0 * * * /usr/local/bin/python2.7 /usr/local/bin/incoming.py -p /zeniba/shared/incoming -d /zeniba/shared/tanuki
+```
+
+### Tanuki user
+
+For the time being, the incoming processor is run via root's crontab, so there is a bit of an ugly setup to get the file ownership in a reasonable state.
+
+```
+$ pfexec groupadd tanuki
+$ pfexec useradd -c 'Tanuki User' -d /var/spool/tanuki -g tanuki -s /usr/bin/false tanuki
+$ pfexec chown tanuki:tanuki /usr/local/bin/incoming.py
+$ pfexec chmod u+s,g+s /usr/local/bin/incoming.py
+$ pfexec chown -R tanuki:tanuki /zeniba/shared/tanuki
 ```
