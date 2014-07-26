@@ -1,0 +1,8 @@
+{application, incoming, [
+  {description, "Image and video library"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {applications, [kernel, stdlib]},
+  {mod, {incoming_app, []}},
+  {env, []}
+]}.

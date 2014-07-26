@@ -4,13 +4,8 @@
 
 ### Getting Started
 
-1. Learn more about rebar and layout of project consisting of multiple applications.
-    * Look at [howistart.org](http://howistart.org/posts/erlang/1) example
-    * Move incoming.py to `scripts` directory
-    * Create a stub incoming app in Erlang
-    * Set up rebar and relx configuration
-1. Figure out where Nitrogen app fits within that framework.
-1. Code up a simple prototype backend for tanuki assets.
+1. Figure out where a Nitrogen app fits within the rebar application framework.
+1. Code up a simple prototype backend for tanuki assets (see basic operations below).
 1. Code up a front page for an overview of what is stored in tanuki.
 
 ### Prototype
@@ -19,7 +14,7 @@
     * Query tags
     * Query dates
     * Document details (e.g. path to asset)
-1. Wire web app front-end to the backend
+1. Connect web front-end to the backend service
     * Display available tags
     * Display available dates (year, then months, then days?)
     * Display assets by tag
@@ -27,6 +22,12 @@
     * Display a single asset
 
 ## Incoming Processor
+
+### Implementation Details
+
+* Be sure to write thorough unit tests to guard against accidental data loss. The data loader is the most fragile in the system because it adds records to the database and moves files in the file system. These need to be performed as an atomic transaction.
+    * Attempt to move the asset into place first; if that fails stop immediately.
+    * If the attempt to insert the document into the database fails, revert the asset move.
 
 ### Installation and Configuration
 
