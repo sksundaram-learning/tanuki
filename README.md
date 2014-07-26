@@ -6,7 +6,7 @@ Yes, another one of these. I am a programmer, it's what I do. I want to learn Er
 
 ## Python Prototype
 
-Currently a proof-of-concept system has been written appears to be working. The incoming processor, currently implemented in Python, will eventually be rewritten in Erlang. Some boilerplate Erlang applications are in place, using [rebar](https://github.com/rebar/rebar/) and [relx](http://relx.org/) to build the system. As I go through [Learn You Some Erlang](http://learnyousomeerlang.com), I will flesh out the applications.
+Currently a proof-of-concept system has been written and appears to be working. The incoming processor, currently implemented in Python, will eventually be rewritten in Erlang. Some boilerplate Erlang applications are in place, using [rebar](https://github.com/rebar/rebar/) and [relx](http://relx.org/) to build the system. As I go through [Learn You Some Erlang](http://learnyousomeerlang.com), I will flesh out the applications.
 
 ## TODO
 
