@@ -26,6 +26,9 @@ To prevent the new, unversioned `python` executables from causing problems with 
 database_dir = /zeniba/shared/couchdb
 ```
 
+* Ensure the `couchdb` user and group own the files (or at the very least, the `local.ini` file) under `/usr/local/etc/couchdb` so that Futon can make changes to the configuration.
+* Visit the Futon administrative interface and create an admin account (look for the tiny link in the bottom-right corner).
+
 ## Incoming Processor
 
 ### Dependencies
@@ -54,6 +57,8 @@ $ pfexec pip2.7 install exifread
 ### Tanuki user
 
 For the time being, the incoming processor is run via root's crontab, so there is a bit of an ugly setup to get the file ownership in a reasonable state.
+
+_This ownership business did not work. Does tanuki need a valid login shell?_
 
 ```
 $ pfexec groupadd tanuki
