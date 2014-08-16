@@ -9,3 +9,4 @@ ebin
 erl_crash.dump
 logs
 .vagrant
+*.pyc
