@@ -1,5 +1,10 @@
 # TODO
 
+## Overall
+
+* Use [concrete](https://github.com/opscode/concrete) for dev-only dependencies
+* Use [PropEr](http://proper.softlab.ntua.gr) for property-based testing
+
 ## Web UI
 
 ### Getting Started
@@ -45,6 +50,12 @@
 ### Configuration
 
 Use application environment (defined with `{env [{Key, Val}]}` in `.app.src` file) to indicate the default location of an `etcd` [^1] or `consul` [^2] instance from which the system configuration is retrieved. Why? There is no honest justification other than "because it is cool!"
+
+- Log everything to a file
+- Configure logwatch to generate a daily log summary
+    - Check on couchdb logs as well
+    - Check on Nitrogen logs as well
+- Use docker to automate building a testing environment
 
 [^1]: https://github.com/coreos/etcd
 [^2]: https://github.com/hashicorp/consul
