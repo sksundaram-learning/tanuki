@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Fabric file for installing requirements on OpenIndiana."""
+"""Fabric file for installing requirements on OpenIndiana.
 
-from fabric.api import cd, env, path, run, shell_env, sudo
+First run `install_erlang` and then `install_couchdb`.
+
+"""
+
+from fabric.api import cd, env, path, put, run, shell_env, sudo
 
 env.sudo_prefix = 'pfexec '
 
-# TODO: install CouchDB
-# TOOD?: install compress/xz so we can fetch the smallest source tarball
+# TODO?: install compress/xz so we can fetch the smallest source tarball
 # TODO?: install Python 2.7
 # TODO?: install pip using python2.7
 # TODO?: install exifread using pip2.7
@@ -17,12 +20,25 @@ URL_FOP = 'http://mirrors.sonic.net/apache/xmlgraphics/fop/binaries/{}'.format(T
 DIR_OTP = 'otp_src_17.1'
 TAR_OTP = '{}.tar.gz'.format(DIR_OTP)
 URL_OTP = 'http://www.erlang.org/download/{}'.format(TAR_OTP)
+DIR_CDB = 'apache-couchdb-1.6.0'
+TAR_CDB = '{}.tar.gz'.format(DIR_CDB)
+URL_CDB = 'http://mirrors.sonic.net/apache/couchdb/source/1.6.0/{}'.format(TAR_CDB)
 
 
 def install_erlang():
-    """Install Erlang/OTP from source tarball."""
-    install_tools()
-    install_jdk()
+    """Install Erlang/OTP from source tarball (installs tools & JDK)."""
+    tools_pkgs = [
+        'developer/illumos-gcc',
+        'developer/gnu-binutils',
+        'system/header',
+        'system/library/math/header-math',
+        'developer/library/lint',
+        'compatibility/ucb'
+    ]
+    _pkg_install(tools_pkgs)
+    # crle is idempotent, adding the same path twice is okay
+    sudo('crle -u -l /opt/gcc/4.4.4/lib')
+    _pkg_install('developer/java/jdk')
     # Fetch and extract Apache FOP binary tarball
     run('wget -q {}'.format(URL_FOP))
     run('tar zxf {}'.format(TAR_FOP))
@@ -40,24 +56,40 @@ def install_erlang():
     run('rm -rf {}* {}*'.format(DIR_FOP, DIR_OTP))
 
 
-def install_tools():
-    """Install the developer tools packages."""
-    tools_pkgs = [
-        'developer/illumos-gcc',
-        'developer/gnu-binutils',
-        'system/header',
-        'system/library/math/header-math',
-        'developer/library/lint',
-        'compatibility/ucb'
-    ]
-    _pkg_install(tools_pkgs)
-    # crle is idempotent, adding the same path twice is okay
-    sudo('crle -u -l /opt/gcc/4.4.4/lib')
-
-
-def install_jdk():
-    """Install the Java Development Kit package."""
-    _pkg_install('developer/java/jdk')
+def install_couchdb():
+    """Install Apache CouchDB and dependencies (requires Erlang/OTP)."""
+    _pkg_install('developer/icu')
+    # remove -lCrun from LDFLAGS in /usr/bin/icu-config
+    icu_file = '/usr/bin/icu-config'
+    lcrun_re = 's/^\(LDFLAGS=.*\) -lCrun\(.*\)$/\\1\\2/'
+    sudo("sed -i.bak -e '{}' {}".format(lcrun_re, icu_file))
+    sudo('pkg set-publisher -p http://pkg.openindiana.org/sfe')
+    _pkg_install('runtime/javascript/spidermonkey')
+    _pkg_install('library/nspr/header-nspr')
+    run('wget -q {}'.format(URL_CDB))
+    run('tar zxf {}'.format(TAR_CDB))
+    path_addend = '/usr/local/bin:/opt/gcc/4.4.4/bin'
+    with cd(DIR_CDB), path(path_addend):
+        with shell_env(LDFLAGS='-L/usr/lib -L/usr/lib/mps'):
+            run('./configure')
+        run('make')
+        sudo('make install')
+        sudo('crle -u -l /usr/lib/mps')
+    run('rm -rf {}*'.format(DIR_CDB))
+    sudo('groupadd couchdb')
+    sudo("useradd -c 'CouchDB User' -d /usr/local/var/lib/couchdb" +
+         " -g couchdb -s /usr/bin/false couchdb")
+    sudo('chown -R couchdb:couchdb /usr/local/var/lib/couchdb')
+    sudo('chown -R couchdb:couchdb /usr/local/var/log/couchdb')
+    sudo('chown -R couchdb:couchdb /usr/local/var/run/couchdb')
+    ini_re = 's/^;bind_address = 127.0.0.1$/bind_address = 0.0.0.0/'
+    ini_file = '/usr/local/etc/couchdb/local.ini'
+    sudo("sed -i.bak -e '{}' {}".format(ini_re, ini_file))
+    sudo('mkdir -p /var/svc/manifest/application/database')
+    put('couchdb.xml', '/var/svc/manifest/application/database', use_sudo=True)
+    sudo('chown -R root:sys /var/svc/manifest/application/database')
+    sudo('svccfg -v import /var/svc/manifest/application/database/couchdb.xml')
+    sudo('svcadm enable couch')
 
 
 def _pkg_install(pkg):
