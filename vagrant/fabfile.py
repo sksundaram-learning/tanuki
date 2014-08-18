@@ -9,11 +9,6 @@ from fabric.api import cd, env, path, put, run, shell_env, sudo
 
 env.sudo_prefix = 'pfexec '
 
-# TODO?: install compress/xz so we can fetch the smallest source tarball
-# TODO?: install Python 2.7
-# TODO?: install pip using python2.7
-# TODO?: install exifread using pip2.7
-
 DIR_FOP = 'fop-1.1'
 TAR_FOP = '{}-bin.tar.gz'.format(DIR_FOP)
 URL_FOP = 'http://mirrors.sonic.net/apache/xmlgraphics/fop/binaries/{}'.format(TAR_FOP)
@@ -45,8 +40,8 @@ def install_erlang():
     # Prepare to build Erlang/OTP from source
     run('wget -q {}'.format(URL_OTP))
     run('tar zxf {}'.format(TAR_OTP))
-    paths = '/opt/gcc/4.4.4/bin:~/{}'.format(DIR_FOP)
-    with cd(DIR_OTP), path(paths):
+    path_addend = '/opt/gcc/4.4.4/bin:~/{}'.format(DIR_FOP)
+    with cd(DIR_OTP), path(path_addend):
         run('./configure')
         run('make')
         sudo('make install')
