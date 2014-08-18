@@ -21,6 +21,7 @@ import hashlib
 import mimetypes
 import os
 import pwd
+import socket
 import sys
 
 import couchdb
@@ -41,7 +42,7 @@ def _connect_couch():
     couch = couchdb.Server()
     try:
         couch.version()
-    except ConnectionRefusedError:
+    except socket.error:
         sys.stderr.write("Unable to connect to CouchDB at default location.")
         sys.exit(1)
     return couch
