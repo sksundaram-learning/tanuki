@@ -10,6 +10,9 @@
 ### Getting Started
 
 1. Figure out where a Nitrogen app fits within the rebar application framework.
+    * See [^1] for steps on adding Nitrogen as a dependency via rebar
+1. Get this running in the Solaris VM
+1. Document the procedure, possibly update the `fabfile.py` script
 1. Code up a simple prototype backend for tanuki assets (see basic operations below).
 1. Code up a front page for an overview of what is stored in tanuki.
 
@@ -49,13 +52,12 @@
 
 ### Configuration
 
-Use application environment (defined with `{env [{Key, Val}]}` in `.app.src` file) to indicate the default location of an `etcd` [^1] or `consul` [^2] instance from which the system configuration is retrieved. Why? There is no honest justification other than "because it is cool!"
+Use application environment (defined with `{env [{Key, Val}]}` in `.app.src` file) to indicate the default location of a configuration file.
 
 - Log everything to a file
 - Configure logwatch to generate a daily log summary
     - Check on couchdb logs as well
     - Check on Nitrogen logs as well
-- Use docker to automate building a testing environment
+- Use Fabric to automate building a testing environment
 
-[^1]: https://github.com/coreos/etcd
-[^2]: https://github.com/hashicorp/consul
+[^1]: https://rshestakov.wordpress.com/2013/03/03/how-to-add-nitrogen-and-cowboy-as-dependecy-libs-to-your-erlang-application/
