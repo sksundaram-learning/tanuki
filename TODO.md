@@ -9,8 +9,7 @@
 
 ### Getting Started
 
-1. Figure out where a Nitrogen app fits within the rebar application framework.
-    * See [^1] for steps on adding Nitrogen as a dependency via rebar
+1. Work out why app cannot load vars from sys.config
 1. Get this running in the Solaris VM
 1. Document the procedure, possibly update the `fabfile.py` script
 1. Code up a simple prototype backend for tanuki assets (see basic operations below).
@@ -59,5 +58,3 @@ Use application environment (defined with `{env [{Key, Val}]}` in `.app.src` fil
     - Check on couchdb logs as well
     - Check on Nitrogen logs as well
 - Use Fabric to automate building a testing environment
-
-[^1]: https://rshestakov.wordpress.com/2013/03/03/how-to-add-nitrogen-and-cowboy-as-dependecy-libs-to-your-erlang-application/

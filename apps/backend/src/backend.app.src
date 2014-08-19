@@ -1,8 +1,11 @@
 {application, backend, [
-  {description, "Image and video library"},
-  {vsn, "0.1.0"},
-  {registered, []},
-  {applications, [kernel, stdlib]},
-  {mod, {backend_app, []}},
-  {env, []}
+    {description, "Image and video library"},
+    {vsn, "0.1.0"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib
+    ]},
+    {mod, {backend_app, []}},
+    {env, []}
 ]}.
