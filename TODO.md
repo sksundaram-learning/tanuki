@@ -9,7 +9,7 @@
 
 ### Getting Started
 
-1. Work out why app cannot load vars from sys.config
+1. Nitrogen has trouble finding the templates in `priv/templates`
 1. Get this running in the Solaris VM
 1. Document the procedure, possibly update the `fabfile.py` script
 1. Code up a simple prototype backend for tanuki assets (see basic operations below).
@@ -27,6 +27,12 @@
     * Display assets by tag
     * Display assets by date (with pagination?)
     * Display a single asset
+
+### Implementation Details
+
+* Starting tanuki backend on file server
+    * Use SMF
+    * Use erl flags: -detached
 
 ## Incoming Processor
 

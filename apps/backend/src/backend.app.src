@@ -4,7 +4,12 @@
     {registered, []},
     {applications, [
         kernel,
-        stdlib
+        stdlib,
+        mimetypes,
+        simple_bridge,
+        cowboy,
+        sync,
+        nitrogen_core
     ]},
     {mod, {backend_app, []}},
     {env, []}
