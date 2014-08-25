@@ -2,13 +2,10 @@
 %% vim: ts=4 sw=4 et
 -module(nitrogen_sup).
 -behaviour(supervisor).
--export([
-    start_link/0,
-    init/1
-]).
+-export([start_link/0, init/1]).
 
 %% Helper macro for declaring children of supervisor
-% -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
+-define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 
 %% ===================================================================
 %% API functions
@@ -29,7 +26,6 @@ init([]) ->
 
     %% Start Cowboy...
     application:start(cowboy),
-    % TODO: getting undefined here, why?
     {ok, BindAddress} = application:get_env(cowboy, bind_address),
     {ok, Port} = application:get_env(cowboy, port),
     {ok, ServerName} = application:get_env(cowboy, server_name),

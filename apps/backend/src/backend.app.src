@@ -5,10 +5,12 @@
     {applications, [
         kernel,
         stdlib,
+        syntax_tools,  %% erl_syntax module
+        compiler,      %% compile module
         mimetypes,
         simple_bridge,
         cowboy,
-        sync,
+        % sync,
         nitrogen_core
     ]},
     {mod, {backend_app, []}},
