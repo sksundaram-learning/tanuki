@@ -32,10 +32,12 @@ init([]) ->
     {ok, DocRoot} = application:get_env(cowboy, document_root),
     {ok, StaticPaths} = application:get_env(cowboy, static_paths),
 
+    %% TODO: need the base path configured somewhere, via relx
+    DocRoot2 = filename:join([".", "lib", "backend-0.1.0", DocRoot]),
     io:format("Starting Cowboy Server (~s) on ~s:~p, root: '~s'~n",
-              [ServerName, BindAddress, Port, DocRoot]),
+              [ServerName, BindAddress, Port, DocRoot2]),
 
-    Dispatch = init_dispatch(DocRoot, StaticPaths),
+    Dispatch = init_dispatch(DocRoot2, StaticPaths),
     {ok, _} = cowboy:start_http(http, 100, [{port, Port}], [
         {env, [{dispatch, Dispatch}]},
         {max_keepalive, 50}
