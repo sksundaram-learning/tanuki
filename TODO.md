@@ -4,14 +4,12 @@
 
 * Use [concrete](https://github.com/opscode/concrete) for dev-only dependencies
 * Use [PropEr](http://proper.softlab.ntua.gr) for property-based testing
+    * Also evaluate QuickCheck
 
 ## Web UI
 
 ### Getting Started
 
-1. Set path to `priv` in app env so pages can reference it easily
-1. Use the path to `priv` to set `DocRoot2` in `nitrogen_sup.erl`
-1. Add a `favicon.ico` to `apps/backend/priv/static`
 1. Get this running in the Solaris VM
 1. Document the procedure, possibly update the `fabfile.py` script
 1. Code up a simple prototype backend for tanuki assets (see basic operations below).

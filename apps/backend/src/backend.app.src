@@ -14,5 +14,8 @@
         nitrogen_core
     ]},
     {mod, {backend_app, []}},
-    {env, []}
+    {env, [
+        % TODO: would be best to have the version inserted during the build
+        {priv_path, [".", "lib", "backend-0.1.0"]}
+    ]}
 ]}.

@@ -3,7 +3,10 @@
 -compile(export_all).
 -include_lib("nitrogen_core/include/wf.hrl").
 
-main() -> #template { file="./lib/backend-0.1.0/priv/templates/bare.html" }.
+main() ->
+    {ok, PrivPath} = application:get_env(backend, priv_path),
+    PrivPathStr = filename:join(PrivPath),
+    #template { file=PrivPathStr ++ "/priv/templates/bare.html" }.
 
 title() -> "Welcome to Nitrogen".
 
