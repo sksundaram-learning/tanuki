@@ -73,8 +73,8 @@ def _process_path(dirpath, db, destpath):
     """
     utcnow = datetime.utcnow()
     importdate = utcnow.strftime(_DATETIME_FORMAT)
-    dirname = os.path.basename(os.path.normpath(dirpath))
-    tags = ",".join(dirname.lower().split('_'))
+    asset_folder = os.path.basename(os.path.normpath(dirpath))
+    tags = ",".join(asset_folder.lower().split('_'))
     for entry in os.listdir(dirpath):
         filepath = os.path.join(dirpath, entry)
         if entry in _EXTRANEOUS_FILES:
@@ -104,7 +104,7 @@ def _process_path(dirpath, db, destpath):
     if len(os.listdir(dirpath)) == 0:
         os.rmdir(dirpath)
     else:
-        print("Unable to remove non-empty directory: {}".format(dirname))
+        print("Unable to remove non-empty directory: {}".format(asset_folder))
 
 
 def _compute_checksum(filepath):
@@ -231,7 +231,11 @@ def main():
         for entry in os.listdir(args.path):
             fullpath = os.path.join(args.path, entry)
             if os.path.isfile(fullpath):
-                print("Ignoring file outside of tagged folder: {}".format(entry))
+                if entry in _EXTRANEOUS_FILES:
+                    # Remove the superfluous files that Mac likes to create.
+                    os.unlink(fullpath)
+                else:
+                    print("Ignoring file outside of tagged folder: {}".format(entry))
             elif os.path.isdir(fullpath):
                 _process_path(fullpath, db, args.dest)
             else:
