@@ -37,6 +37,24 @@ URL_OTP = 'http://www.erlang.org/download/{}'.format(TAR_OTP)
 DIR_CDB = 'apache-couchdb-1.6.0'
 TAR_CDB = '{}.tar.gz'.format(DIR_CDB)
 URL_CDB = 'http://mirrors.sonic.net/apache/couchdb/source/1.6.0/{}'.format(TAR_CDB)
+DIR_GIT = 'git-2.1.0'
+TAR_GIT = '{}.tar.xz'.format(DIR_GIT)
+URL_GIT = 'https://www.kernel.org/pub/software/scm/git/{}'.format(TAR_GIT)
+
+
+def build_all():
+    """Install everything needed to build tanuki."""
+    fix_sh()
+    install_erlang()
+    install_couchdb()
+    install_git()
+    install_rebar()
+    install_relx()
+
+
+def fix_sh():
+    """Replace /bin/sh with a link to bash."""
+    sudo('ln -fs /bin/bash /bin/sh')
 
 
 def install_erlang():
@@ -104,6 +122,41 @@ def install_couchdb():
     sudo('chown -R root:sys /var/svc/manifest/application/database')
     sudo('svccfg -v import /var/svc/manifest/application/database/couchdb.xml')
     sudo('svcadm enable couch')
+
+
+def install_git():
+    """Build and install Git."""
+    _pkg_install('compress/xz')
+    run('wget -q {}'.format(URL_GIT))
+    run('tar Jxf {}'.format(TAR_GIT))
+    path_addend = '/usr/local/bin:/opt/gcc/4.4.4/bin'
+    with cd(DIR_GIT), path(path_addend):
+        run('./configure')
+        run('make')
+        sudo('make install')
+    run('rm -rf {}*'.format(DIR_GIT))
+    sudo('mkdir /etc/curl')
+    sudo('cat /etc/certs/CA/*.pem > /etc/curl/curlCA')
+
+
+def install_rebar():
+    """Build and install the rebar build tool."""
+    run('git clone -q git://github.com/rebar/rebar.git')
+    path_addend = '/usr/local/bin:/opt/gcc/4.4.4/bin'
+    with cd('rebar'), path(path_addend):
+        run('./bootstrap')
+        sudo('cp rebar /usr/local/bin')
+    run('rm -rf rebar')
+
+
+def install_relx():
+    """Build and install the relx release tool."""
+    run('git clone -q https://github.com/erlware/relx.git')
+    path_addend = '/usr/local/bin:/opt/gcc/4.4.4/bin'
+    with cd('relx'), path(path_addend):
+        run('make')
+        sudo('cp relx /usr/local/bin')
+    run('rm -rf relx')
 
 
 def _pkg_install(pkg):

@@ -7,6 +7,8 @@ Vagrant.configure('2') do |config|
 
   # CouchDB port
   config.vm.network 'forwarded_port', guest: 5984, host: 5984
+  # Nitrogen port
+  config.vm.network 'forwarded_port', guest: 8000, host: 8000
 
   config.vm.synced_folder '..', '/vagrant_data'
 
