@@ -26,7 +26,7 @@
 %% them as the scripts/incoming/incoming.py is doing.
 %%
 
--module(incoming_fsm).
+-module(tanuki_incoming_fsm).
 -behaviour(gen_fsm).
 
 -record(state, {fake=0,

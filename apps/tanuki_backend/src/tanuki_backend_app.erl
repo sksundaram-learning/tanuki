@@ -18,14 +18,13 @@
 %% under the License.
 %%
 %% -------------------------------------------------------------------
--module(backend_sup).
--behaviour(supervisor).
+-module(tanuki_backend_app).
+-behaviour(application).
+-export([start/2, stop/1]).
 
--export([start_link/0]).
--export([init/1]).
+start(_Type, _Args) ->
+    nitrogen_sup:start_link(),
+    tanuki_backend_sup:start_link().
 
-start_link() ->
-    supervisor:start_link(?MODULE, []).
-
-init([]) ->
-    {ok, {{one_for_one, 1, 5}, []}}.
+stop(_) ->
+    ok.

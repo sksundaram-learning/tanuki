@@ -18,13 +18,12 @@
 %% under the License.
 %%
 %% -------------------------------------------------------------------
--module(backend_app).
+-module(tanuki_incoming_app).
 -behaviour(application).
 -export([start/2, stop/1]).
 
 start(_Type, _Args) ->
-    nitrogen_sup:start_link(),
-    backend_sup:start_link().
+    tanuki_incoming_sup:start_link().
 
 stop(_) ->
     ok.

@@ -50,7 +50,7 @@ init([]) ->
     {ok, DocRoot} = application:get_env(cowboy, document_root),
     {ok, StaticPaths} = application:get_env(cowboy, static_paths),
 
-    {ok, PrivPath} = application:get_env(backend, priv_path),
+    {ok, PrivPath} = application:get_env(tanuki_backend, priv_path),
     DocRoot2 = filename:join(PrivPath ++ [DocRoot]),
     io:format("Starting Cowboy Server (~s) on ~s:~p, root: '~s'~n",
               [ServerName, BindAddress, Port, DocRoot2]),

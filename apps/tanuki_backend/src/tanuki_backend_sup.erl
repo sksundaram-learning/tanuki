@@ -18,12 +18,14 @@
 %% under the License.
 %%
 %% -------------------------------------------------------------------
--module(incoming_app).
--behaviour(application).
--export([start/2, stop/1]).
+-module(tanuki_backend_sup).
+-behaviour(supervisor).
 
-start(_Type, _Args) ->
-    incoming_sup:start_link().
+-export([start_link/0]).
+-export([init/1]).
 
-stop(_) ->
-    ok.
+start_link() ->
+    supervisor:start_link(?MODULE, []).
+
+init([]) ->
+    {ok, {{one_for_one, 1, 5}, []}}.

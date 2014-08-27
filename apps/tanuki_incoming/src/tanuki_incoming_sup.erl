@@ -18,7 +18,7 @@
 %% under the License.
 %%
 %% -------------------------------------------------------------------
--module(incoming_sup).
+-module(tanuki_incoming_sup).
 -behaviour(supervisor).
 
 -export([start_link/0]).
@@ -30,5 +30,5 @@ start_link() ->
 init([]) ->
     {ok, {{one_for_one, 1, 5},
           [{console,
-            {incoming_fsm, start_link, []},
-            permanent, 5000, worker, [incoming_fsm]}]}}.
+            {tanuki_incoming_fsm, start_link, []},
+            permanent, 5000, worker, [tanuki_incoming_fsm]}]}}.

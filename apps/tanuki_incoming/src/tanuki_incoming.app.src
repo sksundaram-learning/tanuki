@@ -1,8 +1,8 @@
-{application, incoming, [
+{application, tanuki_incoming, [
   {description, "Image and video library"},
   {vsn, "0.1.0"},
   {registered, []},
   {applications, [kernel, stdlib]},
-  {mod, {incoming_app, []}},
+  {mod, {tanuki_incoming_app, []}},
   {env, []}
 ]}.

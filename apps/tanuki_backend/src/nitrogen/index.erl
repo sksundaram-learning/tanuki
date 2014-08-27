@@ -23,7 +23,7 @@
 -include_lib("nitrogen_core/include/wf.hrl").
 
 main() ->
-    {ok, PrivPath} = application:get_env(backend, priv_path),
+    {ok, PrivPath} = application:get_env(tanuki_backend, priv_path),
     PrivPathStr = filename:join(PrivPath),
     #template { file=PrivPathStr ++ "/priv/templates/bare.html" }.
 
