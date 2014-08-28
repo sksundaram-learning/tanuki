@@ -10,6 +10,7 @@
 
 ### Getting Started
 
+1. Start writing some basic unit tests
 1. Code up a simple prototype backend for tanuki assets (see basic operations below).
 1. Code up a front page for an overview of what is stored in tanuki.
 1. Sync scanner is having issues; probably not compatible with relx

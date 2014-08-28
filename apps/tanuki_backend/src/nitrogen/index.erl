@@ -35,6 +35,10 @@ body() ->
     ]}.
 
 inner_body() ->
+    {ok, Url} = application:get_env(tanuki_backend, couchdb_url),
+    S = couchbeam:server_connection(Url, []),
+    {ok, {Info}} = couchbeam:server_info(S),
+    Version = couchbeam_util:get_value(<<"version">>, Info),
     [
         #h1 { text="Welcome to Nitrogen" },
         #p{},
@@ -45,13 +49,8 @@ inner_body() ->
         #p{},
         #button { id=button, text="Click me!", postback=click },
 		#p{},
-        "
-        Run <b>./bin/dev help</b> to see some useful developer commands.
-        ",
-		#p{},
-		"
-		<b>Want to see the ",#link{text="Sample Nitrogen jQuery Mobile Page",url="/mobile"},"?</b>
-		"
+        #label { text="CouchDB version" },
+        #textbox { text=bitstring_to_list(Version) }
     ].
 
 event(click) ->

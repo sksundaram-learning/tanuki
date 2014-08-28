@@ -11,11 +11,14 @@
         simple_bridge,
         cowboy,
         % sync,
-        nitrogen_core
+        nitrogen_core,
+        jsx,           %% for couchbeam
+        couchbeam
     ]},
     {mod, {tanuki_backend_app, []}},
     {env, [
         % TODO: would be best to have the version inserted during the build
-        {priv_path, [".", "lib", "tanuki_backend-0.1.0"]}
+        {priv_path, [".", "lib", "tanuki_backend-0.1.0"]},
+        {couchdb_url, "http://localhost:5984"}
     ]}
 ]}.
