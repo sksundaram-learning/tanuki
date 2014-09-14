@@ -11,13 +11,18 @@
 ### Getting Started
 
 1. Start writing some basic unit tests
+    * Write a `tanuki_backend` module that does the send/receive to the other processes
+        * gen_server uses registered names to avoid holding Pids
+        * e.g. functions for querying data from database
+    * Query documents in database
+    * Collect unique set of tags in database documents
+    * Find documents by tag
 1. Code up a simple prototype backend for tanuki assets (see basic operations below).
 1. Code up a front page for an overview of what is stored in tanuki.
 1. Sync scanner is having issues; probably not compatible with relx
-1. Look at rebar's `recursive_cmds` as a way to custom build each application
-    * Replace `apps/backend/Makefile` with hooks in nested `rebar.config`
-        * i.e. the copying of static resources, etc
-        * add the static dir as an ignore via `.gitignore` in that folder
+    * Probably need a 'dev' mode that does not use the release build
+1. Use ETS to cache the tags and such in memory of `tanuki_backend` process
+    * Cache invalidation via couchbeam change listeners
 1. Look at https://github.com/sylane/erod rel/reltool.config
     * Use of overlay to copy scripts into release directory may be useful
 
