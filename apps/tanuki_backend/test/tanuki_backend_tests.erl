@@ -22,11 +22,26 @@
 -compile(export_all).
 -include_lib("eunit/include/eunit.hrl").
 
+% TODO: consider using Common Test to prep database with test data
+% TODO: consider a Common Test suite to perform a series of tests with the same data
+
 start() ->
+    couchbeam:start(),
+    S = couchbeam:server_connection("http://localhost:5984", []),
+    {ok, Db} = couchbeam:create_db(S, "tanuki_test", []),
+    Doc = {[
+        {<<"_id">>, <<"test">>},
+        {<<"content">>, <<"some text">>}
+    ]},
+    {ok, _Doc1} = couchbeam:save_doc(Db, Doc),
     {ok, Pid} = tanuki_backend_db:start_link(),
     Pid.
 
 stop(Pid) ->
+    % TODO: is there a way to squelch the INFO REPORT when couchbeam stops?
+    S = couchbeam:server_connection("http://localhost:5984", []),
+    couchbeam:delete_db(S, "tanuki_test"),
+    couchbeam:stop(),
     gen_server:call(Pid, terminate).
 
 fetch_document_test_() ->
@@ -35,7 +50,8 @@ fetch_document_test_() ->
      fun stop/1,
      fun fetch_document/1}.
 
-% TODO: replace with real test functions for the yet-to-be-written code in tanuki_backend
 fetch_document(_Pid) ->
-    {Result, Document} = tanuki_backend:fetch_document(foobar),
-    [?_assertEqual(document, Result)].
+    {Result, Document} = tanuki_backend:fetch_document("test"),
+    Content = couchbeam_doc:get_value(<<"content">>, Document),
+    [?_assertEqual(document, Result),
+     ?_assertEqual(<<"some text">>, Content)].

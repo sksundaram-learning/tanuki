@@ -26,5 +26,5 @@
 %%
 
 % TODO: start writing specs for functions
-fetch_document(Doc) ->
-    gen_server:call(tanuki_backend_db, {fetch_document, Doc}).
+fetch_document(DocId) ->
+    gen_server:call(tanuki_backend_db, {fetch_document, DocId}).

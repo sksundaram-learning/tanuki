@@ -23,6 +23,8 @@
 -export([start_link/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
+-record(state, {server, database}).
+
 %%
 %% Client API
 %%
@@ -33,11 +35,16 @@ start_link() ->
 %% gen_server callbacks
 %%
 init([]) ->
-    {ok, []}.
+    % TODO: should get the connection from the app environment
+    Server = couchbeam:server_connection("http://localhost:5984", []),
+    % TODO: how to substitute the appropriate database name for testing?
+    {ok, Db} = couchbeam:open_db(Server, "tanuki_test", []),
+    State = #state{server=Server, database=Db},
+    {ok, State}.
 
-handle_call({fetch_document, Doc}, _From, State) ->
-    % TODO: retrieve the given document
-    {reply, {document, [1, 2, 3]}, State};
+handle_call({fetch_document, DocId}, _From, S = #state{}) ->
+    {ok, Doc} = couchbeam:open_doc(S#state.database, DocId),
+    {reply, {document, Doc}, S};
 handle_call(terminate, _From, State) ->
     {stop, normal, ok, State}.
 
