@@ -35,10 +35,10 @@ start_link() ->
 %% gen_server callbacks
 %%
 init([]) ->
-    % TODO: should get the connection from the app environment
-    Server = couchbeam:server_connection("http://localhost:5984", []),
-    % TODO: how to substitute the appropriate database name for testing?
-    {ok, Db} = couchbeam:open_db(Server, "tanuki_test", []),
+    {ok, Url} = application:get_env(tanuki_backend, couchdb_url),
+    Server = couchbeam:server_connection(Url, []),
+    {ok, DbName} = application:get_env(tanuki_backend, database),
+    {ok, Db} = couchbeam:open_or_create_db(Server, DbName, []),
     State = #state{server=Server, database=Db},
     {ok, State}.
 

@@ -22,13 +22,27 @@
 -compile(export_all).
 -include_lib("eunit/include/eunit.hrl").
 
+-define(TESTDB, "tanuki_test").
+
 % TODO: consider using Common Test to prep database with test data
 % TODO: consider a Common Test suite to perform a series of tests with the same data
 
 start() ->
-    couchbeam:start(),
-    S = couchbeam:server_connection("http://localhost:5984", []),
-    {ok, Db} = couchbeam:create_db(S, "tanuki_test", []),
+    % send logging to a file to keep the test output clean
+    ok = error_logger:logfile({open, "eunit.log"}),
+    ok = error_logger:tty(false),
+    % load the application so we can read and modify the environment
+    ok = application:load(tanuki_backend),
+    ok = application:set_env(tanuki_backend, database, ?TESTDB),
+    ok = couchbeam:start(),
+    {ok, Url} = application:get_env(tanuki_backend, couchdb_url),
+    S = couchbeam:server_connection(Url, []),
+    % clean up any mess from a previously failed test
+    {ok, _Wat} = case couchbeam:db_exists(S, ?TESTDB) of
+        true  -> couchbeam:delete_db(S, ?TESTDB);
+        false -> {ok, foo}
+    end,
+    {ok, Db} = couchbeam:create_db(S, ?TESTDB, []),
     Doc = {[
         {<<"_id">>, <<"test">>},
         {<<"content">>, <<"some text">>}
@@ -38,9 +52,9 @@ start() ->
     Pid.
 
 stop(Pid) ->
-    % TODO: is there a way to squelch the INFO REPORT when couchbeam stops?
-    S = couchbeam:server_connection("http://localhost:5984", []),
-    couchbeam:delete_db(S, "tanuki_test"),
+    {ok, Url} = application:get_env(tanuki_backend, couchdb_url),
+    S = couchbeam:server_connection(Url, []),
+    couchbeam:delete_db(S, ?TESTDB),
     couchbeam:stop(),
     gen_server:call(Pid, terminate).
 
