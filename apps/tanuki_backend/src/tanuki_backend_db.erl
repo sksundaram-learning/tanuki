@@ -29,7 +29,7 @@
 %% Client API
 %%
 start_link() ->
-    gen_server:start_link({local, tanuki_backend_db}, ?MODULE, [], []).
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %%
 %% gen_server callbacks
@@ -52,7 +52,7 @@ handle_cast(_Msg, State) ->
     {noreply, State}.
 
 handle_info(Msg, State) ->
-    io:format("Unexpected message: ~p~n", [Msg]),
+    error_logger:info_msg("unexpected message: ~p~n", [Msg]),
     {noreply, State}.
 
 terminate(normal, _State) ->
