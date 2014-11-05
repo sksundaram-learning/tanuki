@@ -1,7 +1,10 @@
-.PHONY: clean test
+.PHONY: clean eunit ct
 
 clean:
 	rebar -r clean skip_deps=true
 
-test:
+eunit:
 	rebar -r eunit skip_deps=true
+
+ct:
+	rebar -r ct skip_deps=true

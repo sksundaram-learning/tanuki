@@ -18,19 +18,14 @@
 %% under the License.
 %%
 %% -------------------------------------------------------------------
--module(tanuki_backend_tests).
+-module(tanuki_backend_SUITE).
 -compile(export_all).
+-include_lib("common_test/include/ct.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -define(TESTDB, "tanuki_test").
 
-% TODO: consider using Common Test to prep database with test data
-% TODO: consider a Common Test suite to perform a series of tests with the same data
-
-start() ->
-    % send logging to a file to keep the test output clean
-    ok = error_logger:logfile({open, "eunit.log"}),
-    ok = error_logger:tty(false),
+init_per_suite(Config) ->
     % load the application so we can read and modify the environment
     ok = application:load(tanuki_backend),
     ok = application:set_env(tanuki_backend, database, ?TESTDB),
@@ -43,29 +38,37 @@ start() ->
         false -> {ok, foo}
     end,
     {ok, Db} = couchbeam:create_db(S, ?TESTDB, []),
+    % TODO: populate test database from json files in tanuki_backend_SUITE_data
     Doc = {[
         {<<"_id">>, <<"test">>},
         {<<"content">>, <<"some text">>}
     ]},
     {ok, _Doc1} = couchbeam:save_doc(Db, Doc),
-    {ok, Pid} = tanuki_backend_db:start_link(),
-    Pid.
+    % start the application(s)
+    ok = application:set_env(cowboy, bind_address, "0.0.0.0"),
+    ok = application:set_env(cowboy, port, 8000),
+    ok = application:set_env(cowboy, server_name, nitrogen),
+    ok = application:set_env(cowboy, document_root, "./priv/static"),
+        {},
+    ok = application:set_env(cowboy, static_paths,
+        ["/js/","/images/","/css/","/nitrogen/","/favicon.ico"]),
+    {ok, _Started} = application:ensure_all_started(tanuki_backend),
+    [{url, Url} | Config].
 
-stop(Pid) ->
-    {ok, Url} = application:get_env(tanuki_backend, couchdb_url),
+end_per_suite(Config) ->
+    Url = ?config(url, Config),
     S = couchbeam:server_connection(Url, []),
     couchbeam:delete_db(S, ?TESTDB),
     couchbeam:stop(),
-    gen_server:call(Pid, terminate).
+    gen_server:call(tanuki_backend_db, terminate).
 
-fetch_document_test_() ->
-    {setup,
-     fun start/0,
-     fun stop/1,
-     fun fetch_document/1}.
+all() ->
+    % TODO: add a bunch more tests
+    [fetch_document].
 
-fetch_document(_Pid) ->
+fetch_document(Config) ->
     {Result, Document} = tanuki_backend:fetch_document("test"),
+    ?assertEqual(document, Result),
     Content = couchbeam_doc:get_value(<<"content">>, Document),
-    [?_assertEqual(document, Result),
-     ?_assertEqual(<<"some text">>, Content)].
+    ?assertEqual(<<"some text">>, Content),
+    ok.

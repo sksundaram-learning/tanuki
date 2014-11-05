@@ -28,4 +28,12 @@ start_link() ->
     supervisor:start_link(?MODULE, []).
 
 init([]) ->
-    {ok, {{one_for_one, 1, 5}, []}}.
+    MaxRestart = 1,
+    MaxTime = 5,
+    {ok, {{one_for_one, MaxRestart, MaxTime},
+          [{tanuki_server,
+            {tanuki_backend_db, start_link, []},
+            permanent,
+            5000,
+            worker,
+            [tanuki_backend_db]}]}}.
