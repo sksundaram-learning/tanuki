@@ -2,17 +2,10 @@
 
 ## Prerequisites
 
-While you could certainly perform the entire development cycle within your favorite environment, it makes some sense to use the OpenIndiana VM, to ensure everything works for the target system.
+While you could certainly perform the entire development cycle within your favorite environment, it makes some sense to use the Linux VM, to ensure everything works for the target system.
 
 * [VirtualBox](https://www.virtualbox.org)
 * [Vagrant](http://www.vagrantup.com)
-* [OpenIndiana](http://openindiana.org) 151a9 Vagrant box
-    * Install OpenIndiana 151a9 in VirtualBox
-    * Set up according to the Vagrant instructions
-        * vagrant user with insecure password
-        * vagrant insecure ssh key
-        * VirtualBox guest additions
-    * `vagrant package ...`
 * [Fabric](http://www.fabfile.org)
 
 ## Setup
@@ -25,11 +18,11 @@ $ ./runfab build_all
 
 ## Development Cycle
 
-As mentioned above, it is probably best to use the OpenIndiana VM for development, to ensure everything works for the target system. You could, of course, use any system on which Erlang and CouchDB are supported.
+As mentioned above, it is probably best to use the Linux VM for development, to ensure everything works for the target system. You could, of course, use any system on which Erlang and CouchDB are supported.
 
 * Perform the setup for the VM as described above.
 * Edit the code using your favorite editor on the host system
-* From the OpenIndiana VM, run the following commands:
+* From the Linux VM, run the following commands:
 ```
 $ cd /vagrant_data
 $ rebar compile
