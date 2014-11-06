@@ -10,7 +10,6 @@
 
 ### Getting Started
 
-1. Check for updated dependencies (couchbeam and hackney for certain)
 1. Start writing some basic unit tests
     * Write a `tanuki_backend` module that does the send/receive to the other processes
         * gen_server uses registered names to avoid holding Pids
