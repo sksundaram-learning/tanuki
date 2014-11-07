@@ -4,7 +4,7 @@
 
 * Use [concrete](https://github.com/opscode/concrete) for dev-only dependencies
 * Use [PropEr](http://proper.softlab.ntua.gr) for property-based testing
-    * Also evaluate QuickCheck
+* Evaluate [QuickCheck](https://github.com/krestenkrab/triq) vs PropEr
 
 ## Web UI
 
@@ -41,14 +41,16 @@
 
 ### Implementation Details
 
-* Starting tanuki backend on file server
-    * Use SMF
+* Starting tanuki backend on the server
+    * Use Ubuntu Upstart
     * Use erl flags: -detached
 
 ## Incoming Processor
 
 ### Features
 
+* Runs in the same process as the backend, kicked off by a timer (c.f. timer:send_after/2)
+* Log actions during import
 * Send a daily email report of everything that was imported
     * Include the names of files and their checksums
     * Organize by tags
@@ -69,9 +71,3 @@
 ### Configuration
 
 Use application environment (defined with `{env [{Key, Val}]}` in `.app.src` file) to indicate the default location of a configuration file.
-
-- Log everything to a file
-- Configure logwatch to generate a daily log summary
-    - Check on couchdb logs as well
-    - Check on Nitrogen logs as well
-- Use Fabric to automate building a testing environment

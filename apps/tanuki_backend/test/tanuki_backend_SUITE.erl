@@ -38,12 +38,7 @@ init_per_suite(Config) ->
         false -> {ok, foo}
     end,
     {ok, Db} = couchbeam:create_db(S, ?TESTDB, []),
-    % TODO: populate test database from json files in tanuki_backend_SUITE_data
-    Doc = {[
-        {<<"_id">>, <<"test">>},
-        {<<"content">>, <<"some text">>}
-    ]},
-    {ok, _Doc1} = couchbeam:save_doc(Db, Doc),
+    add_test_docs(Db, Config),
     % start the application(s)
     ok = application:set_env(cowboy, bind_address, "0.0.0.0"),
     ok = application:set_env(cowboy, port, 8000),
@@ -54,6 +49,19 @@ init_per_suite(Config) ->
         ["/js/","/images/","/css/","/nitrogen/","/favicon.ico"]),
     {ok, _Started} = application:ensure_all_started(tanuki_backend),
     [{url, Url} | Config].
+
+add_test_docs(Db, Config) ->
+    % populate test database from json files in data_dir
+    DataDir = ?config(data_dir, Config),
+    InsertDocument = fun(Filename) ->
+        Filepath = filename:join([DataDir, Filename]),
+        {ok, Binary} = file:read_file(Filepath),
+        Json = couchbeam_ejson:decode(Binary),
+        {ok, _Doc1} = couchbeam:save_doc(Db, Json)
+    end,
+    {ok, Filenames} = file:list_dir(DataDir),
+    [InsertDocument(Filename) || Filename <- Filenames],
+    ok.
 
 end_per_suite(Config) ->
     Url = ?config(url, Config),
@@ -66,9 +74,10 @@ all() ->
     % TODO: add a bunch more tests
     [fetch_document].
 
-fetch_document(Config) ->
+fetch_document(_Config) ->
     {Result, Document} = tanuki_backend:fetch_document("test"),
     ?assertEqual(document, Result),
+    % retrieve the 'basic' document
     Content = couchbeam_doc:get_value(<<"content">>, Document),
     ?assertEqual(<<"some text">>, Content),
     ok.
