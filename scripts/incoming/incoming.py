@@ -41,6 +41,7 @@ import hashlib
 import mimetypes
 import os
 import pwd
+import re
 import socket
 import sys
 
@@ -51,6 +52,7 @@ _DB_NAME = 'tanuki'
 _EXIF_DATETIME = 'EXIF DateTimeOriginal'
 _DATETIME_FORMAT = '%Y-%m-%d %H:%M'
 _EXTRANEOUS_FILES = ['.DS_Store', '.localized']
+_DATE_REGEX = re.compile(r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})')
 
 
 def _connect_couch():
@@ -92,9 +94,9 @@ def _process_path(dirpath, db, destpath):
 
     """
     utcnow = datetime.utcnow()
-    importdate = utcnow.strftime(_DATETIME_FORMAT)
+    importdate = _date_string_to_ints_list(utcnow.strftime(_DATETIME_FORMAT))
     asset_folder = os.path.basename(os.path.normpath(dirpath))
-    tags = ",".join(asset_folder.lower().split('_'))
+    tags = asset_folder.lower().split('_')
     for entry in os.listdir(dirpath):
         filepath = os.path.join(dirpath, entry)
         if entry in _EXTRANEOUS_FILES:
@@ -106,8 +108,8 @@ def _process_path(dirpath, db, destpath):
         elif os.path.isfile(filepath):
             checksum = _compute_checksum(filepath)
             doc = dict()
-            doc['exif_date'] = _get_original_date(filepath)
-            doc['file_date'] = _file_date(filepath)
+            doc['exif_date'] = _date_string_to_ints_list(_get_original_date(filepath))
+            doc['file_date'] = _date_string_to_ints_list(_file_date(filepath))
             doc['file_name'] = entry
             doc['file_owner'] = _file_owner(filepath)
             doc['file_size'] = os.stat(filepath).st_size
@@ -204,6 +206,26 @@ def _store_asset(filepath, checksum, destpath):
     newpath = os.path.join(dirname, checksum[4:])
     if not os.path.exists(newpath):
         os.rename(filepath, newpath)
+
+
+def _date_string_to_ints_list(value):
+    """Convert the date string into a list of ints.
+
+    Example: "2014-07-04 12:01" -> [2014, 7, 4, 12, 1]
+
+    :type value: str
+    :param value: date string to convert
+
+    :return: list of ints, or None if value does not match date format.
+
+    """
+    match = _DATE_REGEX.match(value)
+    if match is None:
+        return None
+    result = []
+    for part in match.groups():
+        result.append(int(part))
+    return result
 
 
 def _revert_all(couch, frompath, topath):

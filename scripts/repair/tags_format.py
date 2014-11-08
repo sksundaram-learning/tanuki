@@ -19,16 +19,14 @@
 # under the License.
 #
 # -------------------------------------------------------------------
-"""Fix the EXIF date format in tanuki documents.
+"""Change the tags field format from a string to a list of strings.
 
-Initially the incoming processor prototype created CouchDB documents
-in which the EXIF date looked like "2005:08:21 19:19:49", but what
-was desired was something more like "2005-08-21 19:19". This script
-converts the EXIF dates in an existing tanuki database.
+Initially the incoming processor prototype created CouchDB documents in
+which the tags field was a comma-separated string of values. Instead, it
+should be an array of strings.
 
 """
 
-from datetime import datetime
 import sys
 
 import couchdb
@@ -37,7 +35,7 @@ import couchdb
 def _connect_couch():
     """Connect to CouchDB or die trying.
 
-    Returns the couchdb.Server instance.
+    :return: the couchdb.Server instance.
 
     """
     couch = couchdb.Server()
@@ -49,32 +47,35 @@ def _connect_couch():
     return couch
 
 
-def _convert_exif_dates(couch):
-    """Change the format of the EXIF date fields in the database.
+def _convert_tag_values(couch):
+    """Change the format of the tags field in the database.
 
-    :param couch: instance of couchdb.Server.
+    :type couch: :class:`couchdb.Server`
+    :param couch: API to CouchDB
 
     """
     db = couch['tanuki']
     # Yes, a view written in JavaScript and run on the database would be
     # more efficient, but this is a one-off script and there are only a few
-    # documents right now. And most of those documents have an EXIF date
-    # anyway. For anything larger, really should use a JavaScript view to
-    # select the desired documents.
+    # documents right now.
+    processed = 0
+    observed = 0
     for row in db.view('_all_docs'):
+        observed += 1
         doc = db.get(row.id)
-        exif_date = doc['exif_date']
-        if exif_date is not None:
-            date = datetime.strptime(exif_date, '%Y:%m:%d %H:%M:%S')
-            exif_date = datetime.strftime(date, '%Y-%m-%d %H:%M')
-            doc['exif_date'] = exif_date
+        tags = doc['tags']
+        if isinstance(tags, (str, unicode)):
+            doc['tags'] = tags.split(',')
             db[doc.id] = doc
+            processed += 1
+            print('Saved document {}'.format(doc.id))
+    print("Processed {} of {} documents".format(processed, observed))
 
 
 def main():
     """Convert all of the documents."""
     couch = _connect_couch()
-    _convert_exif_dates(couch)
+    _convert_tag_values(couch)
 
 
 if __name__ == "__main__":
