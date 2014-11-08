@@ -46,7 +46,7 @@ init_per_suite(Config) ->
     ok = application:set_env(cowboy, document_root, "./priv/static"),
         {},
     ok = application:set_env(cowboy, static_paths,
-        ["/js/","/images/","/css/","/nitrogen/","/favicon.ico"]),
+        ["/js/", "/images/", "/css/", "/nitrogen/", "/favicon.ico"]),
     {ok, _Started} = application:ensure_all_started(tanuki_backend),
     [{url, Url} | Config].
 
