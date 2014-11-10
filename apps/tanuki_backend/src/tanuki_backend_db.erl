@@ -39,12 +39,22 @@ init([]) ->
     Server = couchbeam:server_connection(Url, []),
     {ok, DbName} = application:get_env(tanuki_backend, database),
     {ok, Db} = couchbeam:open_or_create_db(Server, DbName, []),
+    install_designs(Db),
     State = #state{server=Server, database=Db},
     {ok, State}.
 
-handle_call({fetch_document, DocId}, _From, S = #state{}) ->
-    {ok, Doc} = couchbeam:open_doc(S#state.database, DocId),
-    {reply, {document, Doc}, S};
+% TODO: add a call to get all documents within specific periods of time (e.g. year, month)
+% TODO: add a call to get all documents with specific tags
+handle_call({fetch_document, DocId}, _From, State = #state{}) ->
+    {ok, Doc} = couchbeam:open_doc(State#state.database, DocId),
+    {reply, {document, Doc}, State};
+handle_call(all_tags, _From, State = #state{}) ->
+    Db = State#state.database,
+    DesignName = "tanuki",
+    ViewName = "tags",
+    Options = [{group_level, 1}],
+    {ok, Rows} = couchbeam_view:fetch(Db, {DesignName, ViewName}, Options),
+    {reply, Rows, State};
 handle_call(terminate, _From, State) ->
     {stop, normal, ok, State}.
 
@@ -55,8 +65,26 @@ handle_info(Msg, State) ->
     error_logger:info_msg("unexpected message: ~p~n", [Msg]),
     {noreply, State}.
 
-terminate(normal, _State) ->
+terminate(_Reason, _State) ->
     ok.
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
+
+%%
+%% internal functions
+%%
+
+install_designs(Db) ->
+    {ok, PrivPath} = application:get_env(tanuki_backend, priv_path),
+    ViewsDir = filename:join(PrivPath ++ ["views"]),
+    InsertDocument = fun(Filename) ->
+        Filepath = filename:join([ViewsDir, Filename]),
+        {ok, Binary} = file:read_file(Filepath),
+        Json = couchbeam_ejson:decode(Binary),
+        {ok, _Doc1} = couchbeam:save_doc(Db, Json)
+    end,
+    ViewPath = filename:absname(ViewsDir),
+    {ok, Filenames} = file:list_dir(ViewPath),
+    [InsertDocument(Filename) || Filename <- Filenames],
+    ok.

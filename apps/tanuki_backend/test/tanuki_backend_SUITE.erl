@@ -29,6 +29,8 @@ init_per_suite(Config) ->
     % load the application so we can read and modify the environment
     ok = application:load(tanuki_backend),
     ok = application:set_env(tanuki_backend, database, ?TESTDB),
+    % CT runs this code from logs/ct_run.test@... directory
+    ok = application:set_env(tanuki_backend, priv_path, ["..", "..", "priv"]),
     ok = couchbeam:start(),
     {ok, Url} = application:get_env(tanuki_backend, couchdb_url),
     S = couchbeam:server_connection(Url, []),
@@ -71,13 +73,27 @@ end_per_suite(Config) ->
     gen_server:call(tanuki_backend_db, terminate).
 
 all() ->
-    % TODO: add a bunch more tests
-    [fetch_document].
+    [
+        fetch_document,
+        all_tags
+    ].
 
 fetch_document(_Config) ->
-    {Result, Document} = tanuki_backend:fetch_document("test"),
+    {Result, Document} = tanuki_backend:fetch_document("test_AA"),
     ?assertEqual(document, Result),
-    % retrieve the 'basic' document
-    Content = couchbeam_doc:get_value(<<"content">>, Document),
-    ?assertEqual(<<"some text">>, Content),
+    Content = couchbeam_doc:get_value(<<"file_owner">>, Document),
+    ?assertEqual(<<"akwok">>, Content),
+    ok.
+
+all_tags(_Config) ->
+    Rows = tanuki_backend:all_tags(),
+    ?assertEqual(4, length(Rows)),
+    Validate = fun(Row, Key, Value) ->
+        ?assertEqual(Key, couchbeam_doc:get_value(<<"key">>, Row)),
+        ?assertEqual(Value, couchbeam_doc:get_value(<<"value">>, Row))
+    end,
+    Keys = [<<"cat">>, <<"cheeseburger">>, <<"dog">>, <<"picnic">>],
+    Values = [2, 1, 1, 2],
+    Expected = lists:zip3(Rows, Keys, Values),
+    [Validate(Row, Key, Value) || {Row, Key, Value} <- Expected],
     ok.

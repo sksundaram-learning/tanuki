@@ -19,7 +19,7 @@
 %%
 %% -------------------------------------------------------------------
 -module(tanuki_backend).
--export([fetch_document/1]).
+-export([all_tags/0, fetch_document/1]).
 
 %%
 %% Client API
@@ -28,3 +28,6 @@
 % TODO: start writing specs for functions
 fetch_document(DocId) ->
     gen_server:call(tanuki_backend_db, {fetch_document, DocId}).
+
+all_tags() ->
+    gen_server:call(tanuki_backend_db, all_tags).
