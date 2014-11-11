@@ -45,11 +45,10 @@ init([]) ->
 
 % TODO: add a call to get all documents within specific periods of time (e.g. year, month)
 % TODO: add a call to get all documents with specific tags
-handle_call({fetch_document, DocId}, _From, State = #state{}) ->
-    {ok, Doc} = couchbeam:open_doc(State#state.database, DocId),
+handle_call({fetch_document, DocId}, _From, #state{database=Db}=State) ->
+    {ok, Doc} = couchbeam:open_doc(Db, DocId),
     {reply, {document, Doc}, State};
-handle_call(all_tags, _From, State = #state{}) ->
-    Db = State#state.database,
+handle_call(all_tags, _From, #state{database=Db}=State) ->
     DesignName = "tanuki",
     ViewName = "tags",
     Options = [{group_level, 1}],
@@ -82,6 +81,12 @@ install_designs(Db) ->
         Filepath = filename:join([ViewsDir, Filename]),
         {ok, Binary} = file:read_file(Filepath),
         Json = couchbeam_ejson:decode(Binary),
+        % TODO: seems like couchbeam:doc_exists/2 is broken (see issue #116)
+        % DocId = bitstring_to_list(couchbeam_doc:get_id(Json)),
+        % case couchbeam:doc_exists(Db, DocId) of
+        %     true -> ok;
+        %     false -> {ok, _Doc1} = couchbeam:save_doc(Db, Json)
+        % end
         {ok, _Doc1} = couchbeam:save_doc(Db, Json)
     end,
     ViewPath = filename:absname(ViewsDir),
