@@ -66,11 +66,11 @@ add_test_docs(Db, Config) ->
     ok.
 
 end_per_suite(Config) ->
+    gen_server:call(tanuki_backend_db, terminate),
     Url = ?config(url, Config),
     S = couchbeam:server_connection(Url, []),
     couchbeam:delete_db(S, ?TESTDB),
-    couchbeam:stop(),
-    gen_server:call(tanuki_backend_db, terminate).
+    couchbeam:stop().
 
 all() ->
     [

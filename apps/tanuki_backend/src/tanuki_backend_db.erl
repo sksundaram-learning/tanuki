@@ -81,13 +81,11 @@ install_designs(Db) ->
         Filepath = filename:join([ViewsDir, Filename]),
         {ok, Binary} = file:read_file(Filepath),
         Json = couchbeam_ejson:decode(Binary),
-        % TODO: seems like couchbeam:doc_exists/2 is broken (see issue #116)
-        % DocId = bitstring_to_list(couchbeam_doc:get_id(Json)),
-        % case couchbeam:doc_exists(Db, DocId) of
-        %     true -> ok;
-        %     false -> {ok, _Doc1} = couchbeam:save_doc(Db, Json)
-        % end
-        {ok, _Doc1} = couchbeam:save_doc(Db, Json)
+        DocId = bitstring_to_list(couchbeam_doc:get_id(Json)),
+        case couchbeam:doc_exists(Db, DocId) of
+            true -> ok;
+            false -> {ok, _Doc1} = couchbeam:save_doc(Db, Json)
+        end
     end,
     ViewPath = filename:absname(ViewsDir),
     {ok, Filenames} = file:list_dir(ViewPath),
