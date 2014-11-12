@@ -44,15 +44,21 @@ init([]) ->
     {ok, State}.
 
 % TODO: add a call to get all documents within specific periods of time (e.g. year, month)
-% TODO: add a call to get all documents with specific tags
 handle_call({fetch_document, DocId}, _From, #state{database=Db}=State) ->
     {ok, Doc} = couchbeam:open_doc(Db, DocId),
     {reply, {document, Doc}, State};
 handle_call(all_tags, _From, #state{database=Db}=State) ->
-    DesignName = "assets",
-    ViewName = "tags",
     Options = [{group_level, 1}],
-    {ok, Rows} = couchbeam_view:fetch(Db, {DesignName, ViewName}, Options),
+    {ok, Rows} = couchbeam_view:fetch(Db, {"assets", "tags"}, Options),
+    {reply, Rows, State};
+handle_call({by_tag, Tag}, _From, #state{database=Db}=State) ->
+    Options = [{key, list_to_binary(Tag)}],
+    {ok, Rows} = couchbeam_view:fetch(Db, {"assets", "by_tag"}, Options),
+    {reply, Rows, State};
+handle_call({by_tags, Tags}, _From, #state{database=Db}=State) ->
+    BinTags = [list_to_binary(Tag) || Tag <- Tags],
+    Options = [{keys, list_to_binary(BinTags)}],
+    {ok, Rows} = couchbeam_view:fetch(Db, {"assets", "by_tag"}, Options),
     {reply, Rows, State};
 handle_call(terminate, _From, State) ->
     {stop, normal, ok, State}.

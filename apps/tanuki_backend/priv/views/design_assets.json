@@ -4,6 +4,9 @@
 	"language": "javascript",
 
 	"views": {
+		"by_tag": {
+			"map": "function (doc) { if (doc.tags && Array.isArray(doc.tags)) { doc.tags.forEach(function (tag) { emit(tag.toLowerCase(), null); }); } }"
+		},
 		"tags": {
 			"map": "function (doc) { if (doc.tags && Array.isArray(doc.tags)) { doc.tags.forEach(function (tag) { emit(tag.toLowerCase(), 1); }); } }",
 			"reduce": "_count"
@@ -12,6 +15,15 @@
 }
 
 /*
+by_tag_map() ->
+function (doc) {
+	if (doc.tags && Array.isArray(doc.tags)) {
+        doc.tags.forEach(function (tag) {
+            emit(tag.toLowerCase(), null);
+	    });
+	}
+}
+
 tags_map() ->
 function (doc) {
     if (doc.tags && Array.isArray(doc.tags)) {

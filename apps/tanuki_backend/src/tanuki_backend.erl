@@ -19,7 +19,7 @@
 %%
 %% -------------------------------------------------------------------
 -module(tanuki_backend).
--export([all_tags/0, fetch_document/1]).
+-export([all_tags/0, by_tag/1, by_tags/1, fetch_document/1]).
 
 %%
 %% Client API
@@ -31,3 +31,9 @@ fetch_document(DocId) ->
 
 all_tags() ->
     gen_server:call(tanuki_backend_db, all_tags).
+
+by_tag(Tag) when is_list(Tag) ->
+    gen_server:call(tanuki_backend_db, {by_tag, Tag}).
+
+by_tags(Tags) when is_list(Tags) ->
+    gen_server:call(tanuki_backend_db, {by_tags, Tags}).

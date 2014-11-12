@@ -46,7 +46,6 @@ init_per_suite(Config) ->
     ok = application:set_env(cowboy, port, 8000),
     ok = application:set_env(cowboy, server_name, nitrogen),
     ok = application:set_env(cowboy, document_root, "./priv/static"),
-        {},
     ok = application:set_env(cowboy, static_paths,
         ["/js/", "/images/", "/css/", "/nitrogen/", "/favicon.ico"]),
     {ok, _Started} = application:ensure_all_started(tanuki_backend),
@@ -75,7 +74,8 @@ end_per_suite(Config) ->
 all() ->
     [
         fetch_document,
-        all_tags
+        all_tags,
+        by_tag
     ].
 
 fetch_document(_Config) ->
@@ -96,4 +96,26 @@ all_tags(_Config) ->
     Values = [2, 1, 1, 2],
     Expected = lists:zip3(Rows, Keys, Values),
     [Validate(Row, Key, Value) || {Row, Key, Value} <- Expected],
+    ok.
+
+by_tag(_Config) ->
+    Rows = tanuki_backend:by_tag("cat"),
+    ?assertEqual(2, length(Rows)),
+    Validate = fun(Row, Id) ->
+        % view has "id" but documents have "_id"? weird
+        ?assertEqual(Id, couchbeam_doc:get_value(<<"id">>, Row))
+    end,
+    Keys = [<<"test_AA">>, <<"test_AC">>],
+    [Validate(Row, Key) || {Row, Key} <- lists:zip(Rows, Keys)],
+    ok.
+
+by_tags(_Config) ->
+    Rows = tanuki_backend:by_tag(["cat", "picnic"]),
+    ?assertEqual(3, length(Rows)),
+    Validate = fun(Row, Id) ->
+        % view has "id" but documents have "_id"? weird
+        ?assertEqual(Id, couchbeam_doc:get_value(<<"id">>, Row))
+    end,
+    Keys = [<<"test_AA">>, <<"test_AB">>, <<"test_AC">>],
+    [Validate(Row, Key) || {Row, Key} <- lists:zip(Rows, Keys)],
     ok.
