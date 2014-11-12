@@ -49,7 +49,7 @@ handle_call({fetch_document, DocId}, _From, #state{database=Db}=State) ->
     {ok, Doc} = couchbeam:open_doc(Db, DocId),
     {reply, {document, Doc}, State};
 handle_call(all_tags, _From, #state{database=Db}=State) ->
-    DesignName = "tanuki",
+    DesignName = "assets",
     ViewName = "tags",
     Options = [{group_level, 1}],
     {ok, Rows} = couchbeam_view:fetch(Db, {DesignName, ViewName}, Options),
