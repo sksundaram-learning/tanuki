@@ -43,7 +43,6 @@ init([]) ->
     State = #state{server=Server, database=Db},
     {ok, State}.
 
-% TODO: add a call to get all documents within specific periods of time (e.g. year, month)
 handle_call({fetch_document, DocId}, _From, #state{database=Db}=State) ->
     {ok, Doc} = couchbeam:open_doc(Db, DocId),
     {reply, {document, Doc}, State};
@@ -51,13 +50,25 @@ handle_call(all_tags, _From, #state{database=Db}=State) ->
     Options = [{group_level, 1}],
     {ok, Rows} = couchbeam_view:fetch(Db, {"assets", "tags"}, Options),
     {reply, Rows, State};
+handle_call({by_date, StartDate, EndDate}, _From, #state{database=Db}=State) ->
+    Options = [
+        {start_key, StartDate},
+        {end_key, EndDate}
+    ],
+    {ok, Rows} = couchbeam_view:fetch(Db, {"assets", "by_date"}, Options),
+    {reply, Rows, State};
 handle_call({by_tag, Tag}, _From, #state{database=Db}=State) ->
     Options = [{key, list_to_binary(Tag)}],
     {ok, Rows} = couchbeam_view:fetch(Db, {"assets", "by_tag"}, Options),
     {reply, Rows, State};
 handle_call({by_tags, Tags}, _From, #state{database=Db}=State) ->
+    % TODO: these queries are not returning anything (couchbeam issue 117)
+    % BinTags = [list_to_bitstring(Tag) || Tag <- Tags],
     BinTags = [list_to_binary(Tag) || Tag <- Tags],
-    Options = [{keys, list_to_binary(BinTags)}],
+    % Options = [{keys, list_to_binary(BinTags)}],
+    % Options = [{keys, list_to_binary(Tags)}],
+    % Options = [{keys, [Tags]}],
+    Options = [{keys, BinTags}],
     {ok, Rows} = couchbeam_view:fetch(Db, {"assets", "by_tag"}, Options),
     {reply, Rows, State};
 handle_call(terminate, _From, State) ->
@@ -81,6 +92,9 @@ code_change(_OldVsn, State, _Extra) ->
 %%
 
 install_designs(Db) ->
+    % Look for .json files in our private views directory and insert them
+    % directly into CouchDB. They are presumed to be our design documents
+    % and thus needed for general operation.
     {ok, PrivPath} = application:get_env(tanuki_backend, priv_path),
     ViewsDir = filename:join(PrivPath ++ ["views"]),
     InsertDocument = fun(Filename) ->
@@ -93,7 +107,13 @@ install_designs(Db) ->
             false -> {ok, _Doc1} = couchbeam:save_doc(Db, Json)
         end
     end,
+    ConsiderDocument = fun(Filename) ->
+        case filename:extension(Filename) of
+            ".json" -> InsertDocument(Filename);
+            _ -> ok
+        end
+    end,
     ViewPath = filename:absname(ViewsDir),
     {ok, Filenames} = file:list_dir(ViewPath),
-    [InsertDocument(Filename) || Filename <- Filenames],
+    [ConsiderDocument(Filename) || Filename <- Filenames],
     ok.

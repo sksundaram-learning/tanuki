@@ -19,7 +19,7 @@
 %%
 %% -------------------------------------------------------------------
 -module(tanuki_backend).
--export([all_tags/0, by_tag/1, by_tags/1, fetch_document/1]).
+-export([all_tags/0, by_date/1, by_date/2, by_tag/1, by_tags/1, fetch_document/1]).
 
 %%
 %% Client API
@@ -37,3 +37,13 @@ by_tag(Tag) when is_list(Tag) ->
 
 by_tags(Tags) when is_list(Tags) ->
     gen_server:call(tanuki_backend_db, {by_tags, Tags}).
+
+by_date(Year) when is_integer(Year) ->
+    StartDate = [Year, 0, 0, 0, 0],
+    EndDate = [Year + 1, 0, 0, 0, 0],
+    gen_server:call(tanuki_backend_db, {by_date, StartDate, EndDate}).
+
+by_date(Year, Month) when is_integer(Year), is_integer(Month) ->
+    StartDate = [Year, Month, 0, 0, 0],
+    EndDate = [Year, Month + 1, 0, 0, 0],
+    gen_server:call(tanuki_backend_db, {by_date, StartDate, EndDate}).
