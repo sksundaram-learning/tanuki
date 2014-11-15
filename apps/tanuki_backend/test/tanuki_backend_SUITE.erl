@@ -113,17 +113,16 @@ by_tag(_Config) ->
     ok.
 
 by_tags(_Config) ->
-    % TODO not working because of https://github.com/benoitc/couchbeam/issues/117
-    % Rows = tanuki_backend:by_tag(["cat", "picnic"]),
-    % ?assertEqual(4, length(Rows)),
-    % Validate = fun(Row, Id, Key) ->
-    %     % view has "id" but documents have "_id"? weird
-    %     ?assertEqual(Id, couchbeam_doc:get_value(<<"id">>, Row)),
-    %     ?assertEqual(Key, couchbeam_doc:get_value(<<"key">>, Row))
-    % end,
-    % Ids = [<<"test_AA">>, <<"test_AC">>, <<"test_AB">>, <<"test_AC">>],
-    % Keys = [<<"cat">>, <<"cat">>, <<"picnic">>, <<"picnic">>],
-    % [Validate(Row, Id, Key) || {Row, Id, Key} <- lists:zip3(Rows, Ids, Keys)],
+    Rows = tanuki_backend:by_tags(["cat", "picnic"]),
+    ?assertEqual(4, length(Rows)),
+    Validate = fun(Row, Id, Key) ->
+        % view has "id" but documents have "_id"? weird
+        ?assertEqual(Id, couchbeam_doc:get_value(<<"id">>, Row)),
+        ?assertEqual(Key, couchbeam_doc:get_value(<<"key">>, Row))
+    end,
+    Ids = [<<"test_AA">>, <<"test_AC">>, <<"test_AB">>, <<"test_AC">>],
+    Keys = [<<"cat">>, <<"cat">>, <<"picnic">>, <<"picnic">>],
+    [Validate(Row, Id, Key) || {Row, Id, Key} <- lists:zip3(Rows, Ids, Keys)],
     ok.
 
 by_year(_Config) ->

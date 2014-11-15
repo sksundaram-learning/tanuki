@@ -62,12 +62,7 @@ handle_call({by_tag, Tag}, _From, #state{database=Db}=State) ->
     {ok, Rows} = couchbeam_view:fetch(Db, {"assets", "by_tag"}, Options),
     {reply, Rows, State};
 handle_call({by_tags, Tags}, _From, #state{database=Db}=State) ->
-    % TODO: these queries are not returning anything (couchbeam issue 117)
-    % BinTags = [list_to_bitstring(Tag) || Tag <- Tags],
     BinTags = [list_to_binary(Tag) || Tag <- Tags],
-    % Options = [{keys, list_to_binary(BinTags)}],
-    % Options = [{keys, list_to_binary(Tags)}],
-    % Options = [{keys, [Tags]}],
     Options = [{keys, BinTags}],
     {ok, Rows} = couchbeam_view:fetch(Db, {"assets", "by_tag"}, Options),
     {reply, Rows, State};
