@@ -12,4 +12,5 @@ ct:
 	rebar -r ct skip_deps=true
 
 release:
+	rebar -r compile skip_deps=true
 	relx

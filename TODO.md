@@ -10,6 +10,7 @@
 
 ### Getting Started
 
+1. Set up a dev build so that sync will work for faster dev cycles.
 1. Code up a front page for an overview of what is stored in tanuki.
 1. Sync scanner is having issues; probably not compatible with relx
     * Probably need a 'dev' mode that does not use the release build

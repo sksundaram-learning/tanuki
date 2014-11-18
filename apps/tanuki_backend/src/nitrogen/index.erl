@@ -27,7 +27,7 @@ main() ->
     PrivPathStr = filename:join(PrivPath),
     #template { file=PrivPathStr ++ "/priv/templates/bare.html" }.
 
-title() -> "Welcome to Nitrogen".
+title() -> "Welcome to Tanuki".
 
 body() ->
     #container_12 { body=[
@@ -40,21 +40,13 @@ inner_body() ->
     {ok, {Info}} = couchbeam:server_info(S),
     Version = couchbeam_util:get_value(<<"version">>, Info),
     [
-        #h1 { text="Welcome to Nitrogen" },
+        #h1 { text="Welcome to Tanuki" },
         #p{},
         "
         If you can see this page, then your Nitrogen server is up and
         running. Click the button below to test postbacks.
         ",
         #p{},
-        #button { id=button, text="Click me!", postback=click },
-		#p{},
         #label { text="CouchDB version" },
         #textbox { text=bitstring_to_list(Version) }
     ].
-
-event(click) ->
-    wf:replace(button, #panel {
-        body="You clicked the button!",
-        actions=#effect { effect=highlight }
-    }).

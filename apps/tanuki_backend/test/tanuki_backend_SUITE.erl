@@ -30,7 +30,7 @@ init_per_suite(Config) ->
     ok = application:load(tanuki_backend),
     ok = application:set_env(tanuki_backend, database, ?TESTDB),
     % CT runs this code from logs/ct_run.test@... directory
-    ok = application:set_env(tanuki_backend, priv_path, ["..", "..", "priv"]),
+    ok = application:set_env(tanuki_backend, priv_path, ["..", ".."]),
     ok = couchbeam:start(),
     {ok, Url} = application:get_env(tanuki_backend, couchdb_url),
     S = couchbeam:server_connection(Url, []),

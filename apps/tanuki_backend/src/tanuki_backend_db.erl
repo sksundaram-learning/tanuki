@@ -91,7 +91,7 @@ install_designs(Db) ->
     % directly into CouchDB. They are presumed to be our design documents
     % and thus needed for general operation.
     {ok, PrivPath} = application:get_env(tanuki_backend, priv_path),
-    ViewsDir = filename:join(PrivPath ++ ["views"]),
+    ViewsDir = filename:join(PrivPath ++ ["priv", "views"]),
     InsertDocument = fun(Filename) ->
         Filepath = filename:join([ViewsDir, Filename]),
         {ok, Binary} = file:read_file(Filepath),
