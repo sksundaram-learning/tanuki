@@ -18,7 +18,7 @@
 %% under the License.
 %%
 %% -------------------------------------------------------------------
--module(index).
+-module(asset).
 -compile(export_all).
 -include_lib("nitrogen_core/include/wf.hrl").
 
@@ -27,7 +27,9 @@ main() ->
     PrivPathStr = filename:join(PrivPath),
     #template { file=PrivPathStr ++ "/priv/templates/bare.html" }.
 
-title() -> "Welcome to Tanuki".
+title() ->
+    Id = wf:q(id),
+    "Asset " ++ Id.
 
 body() ->
     #container_12 { body=[
@@ -35,17 +37,13 @@ body() ->
     ]}.
 
 inner_body() ->
-    Rows = tanuki_backend:all_tags(),
-    MakeLink = fun(Row) ->
-        Label = bitstring_to_list(couchbeam_doc:get_value(<<"key">>, Row)),
-        Url = "/tag?name=" ++ Label,
-        [#listitem { body=#link { title=Label, text=Label, url=Url }}]
-    end,
+    Id = wf:q(id),
+    {document, Document} = tanuki_backend:fetch_document(Id),
+    % TODO: fetch additional details of the image and produce a reasonably sized image
+    % TODO: make the image a link to the full-size image
+    Content = bitstring_to_list(couchbeam_doc:get_value(<<"file_owner">>, Document)),
     [
-        #h1 { text="Welcome to Tanuki" },
+        #h1 { text="Asset " ++ Id },
         #p{},
-        #list{
-            numbered=false,
-            body=[MakeLink(Row) || Row <- Rows]
-        }
+        Content
     ].

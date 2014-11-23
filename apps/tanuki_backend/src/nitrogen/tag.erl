@@ -18,7 +18,7 @@
 %% under the License.
 %%
 %% -------------------------------------------------------------------
--module(index).
+-module(tag).
 -compile(export_all).
 -include_lib("nitrogen_core/include/wf.hrl").
 
@@ -27,7 +27,9 @@ main() ->
     PrivPathStr = filename:join(PrivPath),
     #template { file=PrivPathStr ++ "/priv/templates/bare.html" }.
 
-title() -> "Welcome to Tanuki".
+title() ->
+    Tag = wf:q(name),
+    "Assets tagged with " ++ Tag.
 
 body() ->
     #container_12 { body=[
@@ -35,14 +37,17 @@ body() ->
     ]}.
 
 inner_body() ->
-    Rows = tanuki_backend:all_tags(),
+    Tag = wf:q(name),
+    Rows = tanuki_backend:by_tag(Tag),
+    % TODO: organize the assets by date
     MakeLink = fun(Row) ->
-        Label = bitstring_to_list(couchbeam_doc:get_value(<<"key">>, Row)),
-        Url = "/tag?name=" ++ Label,
+        Id = bitstring_to_list(couchbeam_doc:get_value(<<"id">>, Row)),
+        Label = Tag, % TODO: need to generate a unique label (or a thumbnail)?
+        Url = "/asset?id=" ++ Id,
         [#listitem { body=#link { title=Label, text=Label, url=Url }}]
     end,
     [
-        #h1 { text="Welcome to Tanuki" },
+        #h1 { text="Assets tagged with " ++ Tag },
         #p{},
         #list{
             numbered=false,
