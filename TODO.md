@@ -10,14 +10,11 @@
 
 ### Getting Started
 
-1. Set up a dev build so that sync will work for faster dev cycles.
 1. Code up a front page for an overview of what is stored in tanuki.
-1. Sync scanner is having issues; probably not compatible with relx
-    * Probably need a 'dev' mode that does not use the release build
-1. Use ETS to cache the tags and such in memory of `tanuki_backend` process
-    * Cache invalidation via couchbeam change listeners
-1. Look at https://github.com/sylane/erod rel/reltool.config
-    * Use of overlay to copy scripts into release directory may be useful
+1. Figure out why sync recompiles so much code when index.erl is modified.
+1. Use ETS to cache the tags and such in memory of `tanuki_backend` process.
+    * Cache invalidation via couchbeam change listeners.
+1. Look at https://github.com/inaka/elvis for code style enforcement.
 
 ### Prototype
 

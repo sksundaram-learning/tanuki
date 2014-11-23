@@ -10,7 +10,7 @@
         mimetypes,
         simple_bridge,
         cowboy,
-        % sync,
+        sync,
         nitrogen_core,
         jsx,           %% for couchbeam
         couchbeam

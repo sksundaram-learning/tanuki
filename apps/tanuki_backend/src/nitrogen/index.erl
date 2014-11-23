@@ -43,8 +43,7 @@ inner_body() ->
         #h1 { text="Welcome to Tanuki" },
         #p{},
         "
-        If you can see this page, then your Nitrogen server is up and
-        running. Click the button below to test postbacks.
+        List of tags coming soon!
         ",
         #p{},
         #label { text="CouchDB version" },
