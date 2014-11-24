@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------
 #
@@ -29,7 +29,6 @@ blobs once the files are stored in CouchDB.
 See the project home page for details: https://github.com/nlfiedler/tanuki
 
 Prerequisites:
-* Python 2.7 -- the EXIF libraries all seem to fail miserably on Python 3.x
 * couchdb -- https://github.com/djc/couchdb-python
 * exifread -- https://github.com/ianare/exif-py
 
@@ -213,13 +212,13 @@ def _date_string_to_ints_list(value):
 
     Example: "2014-07-04 12:01" -> [2014, 7, 4, 12, 1]
 
-    :type value: str
+    :type value: str or None
     :param value: date string to convert
 
     :return: list of ints, or None if value does not match date format.
 
     """
-    match = _DATE_REGEX.match(value)
+    match = _DATE_REGEX.match(value) if value else None
     if match is None:
         return None
     result = []

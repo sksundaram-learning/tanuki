@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------
 #
@@ -64,7 +64,7 @@ def _convert_tag_values(couch):
         observed += 1
         doc = db.get(row.id)
         tags = doc['tags']
-        if isinstance(tags, (str, unicode)):
+        if isinstance(tags, str):
             doc['tags'] = tags.split(',')
             db[doc.id] = doc
             processed += 1

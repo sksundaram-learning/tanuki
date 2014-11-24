@@ -33,8 +33,8 @@ $ ./_rel/tanuki/bin/tanuki
 
 ## Prototype Incoming Processor
 
-### Python 2.7
+### Python 3.x
 
-* Install Python 2.7.x.
+* Install Python 3.x.
 * Install https://github.com/djc/couchdb-python
 * Install https://github.com/ianare/exif-py
