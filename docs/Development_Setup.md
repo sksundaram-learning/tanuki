@@ -36,5 +36,22 @@ $ ./_rel/tanuki/bin/tanuki
 ### Python 3.x
 
 * Install Python 3.x.
+* Install Hy(lang) http://hylang.org
 * Install https://github.com/djc/couchdb-python
 * Install https://github.com/ianare/exif-py
+
+#### Detailed Steps
+
+```
+$ pyvenv-3.4 ~/Python/tanuki
+$ . ~/Python/tanuki/bin/activate
+$ pip install hy
+$ git clone git@github.com:djc/couchdb-python.git
+$ cd couchdb-python
+$ python setup.py build
+$ python setup.py install
+$ git clone git@github.com:ianare/exif-py.git
+$ cd exif-py
+$ python setup.py build
+$ python setup.py install
+```
