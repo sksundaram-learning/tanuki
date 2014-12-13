@@ -1,4 +1,5 @@
-{application, tanuki_backend, [
+% TODO: define a new env value based on external configuration file
+[{application, tanuki_backend, [
     {description, "Digital Asset Management system"},
     {vsn, "0.1.0"},
     {registered, []},
@@ -20,4 +21,4 @@
         {couchdb_url, "http://localhost:5984"},
         {database, "tanuki"}
     ]}
-]}.
+]}].
