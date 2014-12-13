@@ -19,7 +19,9 @@
 %%
 %% -------------------------------------------------------------------
 -module(tanuki_backend).
--export([all_tags/0, by_date/1, by_date/2, by_tag/1, by_tags/1, fetch_document/1]).
+-export([by_checksum/1, by_date/1, by_date/2, by_tag/1, by_tags/1]).
+-export([all_tags/0, date_list_to_string/1, fetch_document/1, path_to_mimes/2]).
+-export([generate_etag/2]).
 
 %%
 %% Client API
@@ -40,6 +42,14 @@ fetch_document(DocId) ->
 -spec all_tags() -> [Rows::term()].
 all_tags() ->
     gen_server:call(tanuki_backend_db, all_tags).
+
+%
+% @doc Retrieves all documents with a given checksum, as couchbeam view results.
+%      Result includes the id and mimetype fields.
+%
+-spec by_checksum(string()) -> [Rows::term()].
+by_checksum(Checksum) when is_list(Checksum) ->
+    gen_server:call(tanuki_backend_db, {by_checksum, Checksum}).
 
 %
 % @doc Retrieves all documents with a given tag, as couchbeam view results.
@@ -76,3 +86,34 @@ by_date(Year, Month) when is_integer(Year), is_integer(Month) ->
     StartDate = [Year, Month, 0, 0, 0],
     EndDate = [Year, Month + 1, 0, 0, 0],
     gen_server:call(tanuki_backend_db, {by_date, StartDate, EndDate}).
+
+%
+% @doc Converts a date-list (list of integers representing a date) of the
+%      form [2014, 7, 4, 12, 1] and converts it to a string: 2014/7/4 12:01.
+%
+-spec date_list_to_string([integer()]) -> string().
+date_list_to_string(Datelist) ->
+    io_lib:format("~p/~p/~p ~p:~p", Datelist).
+
+%
+% @doc Retrieves the mimetype for a document with the given checksum, in
+%      a form suitable for the Cowboy dispatch mimetype handler.
+%
+-spec path_to_mimes(string(), term()) -> {bitstring(), bitstring(), list()}.
+path_to_mimes(Filename, _Database) ->
+    Parts = string:tokens(Filename, "/"),
+    Checksum = string:join(lists:sublist(Parts, length(Parts) - 3, 3), ""),
+    case by_checksum(Checksum) of
+        [] -> [<<"application/octet-stream">>];
+        [H|_T] -> [couchbeam_doc:get_value(<<"value">>, H)]
+    end.
+
+%
+% @doc Returns an ETag for a given file, which essentially means converting
+%      the file path to a sha256 checksum.
+%
+generate_etag(Arguments, strong_etag_extra) ->
+    {_, Filepath} = lists:keyfind(filepath, 1, Arguments),
+    Parts = string:tokens(Filepath, "/"),
+    Checksum = string:join(lists:sublist(Parts, length(Parts) - 3, 3), ""),
+    {strong, list_to_binary(Checksum)}.

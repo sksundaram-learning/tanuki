@@ -37,8 +37,16 @@ var by_date_map = function (doc) {
 // reduce: none
 var by_tag_map = function (doc) {
 	if (doc.tags && Array.isArray(doc.tags)) {
+        var date = null;
+        if (doc.exif_date) {
+            date = doc.exif_date;
+        } else if (doc.file_date) {
+            date = doc.file_date;
+        } else {
+            date = doc.import_date;
+        }
         doc.tags.forEach(function (tag) {
-            emit(tag.toLowerCase(), null);
+            emit(tag.toLowerCase(), [date, doc.file_name]);
 	    });
 	}
 };
@@ -49,5 +57,12 @@ var tags_map = function (doc) {
         doc.tags.forEach(function (tag) {
             emit(tag.toLowerCase(), 1);
         });
+    }
+};
+
+// reduce: none
+var by_checksum_map = function(doc) {
+    if (doc.sha256) {
+        emit(doc.sha256, doc.mimetype);
     }
 };

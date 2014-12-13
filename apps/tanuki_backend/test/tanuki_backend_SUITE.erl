@@ -73,6 +73,7 @@ all() ->
     [
         fetch_document,
         all_tags,
+        by_checksum,
         by_tag,
         by_tags,
         by_year,
@@ -97,6 +98,20 @@ all_tags(_Config) ->
     Values = [2, 1, 1, 2],
     Expected = lists:zip3(Rows, Keys, Values),
     [Validate(Row, Key, Value) || {Row, Key, Value} <- Expected],
+    ok.
+
+by_checksum(_Config) ->
+    Checksum = "39092991d6dde424191780ea7eac2f323accc5686075e3150cbb8fc5da331100",
+    Rows = tanuki_backend:by_checksum(Checksum),
+    ?assertEqual(1, length(Rows)),
+    Validate = fun(Row, Id, Value) ->
+        % view has "id" but documents have "_id"? weird
+        ?assertEqual(Id, couchbeam_doc:get_value(<<"id">>, Row)),
+        ?assertEqual(Value, couchbeam_doc:get_value(<<"value">>, Row))
+    end,
+    Ids = [<<"test_AA">>],
+    Values = [<<"image/jpeg">>],
+    [Validate(Row, Id, Value) || {Row, Id, Value} <- lists:zip3(Rows, Ids, Values)],
     ok.
 
 by_tag(_Config) ->

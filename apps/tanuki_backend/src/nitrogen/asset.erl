@@ -38,11 +38,12 @@ body() ->
 inner_body() ->
     Id = wf:q(id),
     {document, Document} = tanuki_backend:fetch_document(Id),
-    % TODO: fetch additional details of the image and produce a reasonably sized image
-    % TODO: make the image a link to the full-size image
-    Content = bitstring_to_list(couchbeam_doc:get_value(<<"file_owner">>, Document)),
+    ImageBase = "/assets/",
+    Checksum = bitstring_to_list(couchbeam_doc:get_value(<<"sha256">>, Document)),
+    ImageSrc = ImageBase ++ string:substr(Checksum, 1, 2) ++ "/" ++
+        string:substr(Checksum, 3, 2) ++ "/" ++ string:substr(Checksum, 5),
     [
         #h1 { text="Asset " ++ Id },
         #p{},
-        Content
+        #image{ image=ImageSrc }
     ].

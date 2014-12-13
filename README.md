@@ -1,14 +1,12 @@
 # Tanuki
 
-A system for importing, storing, categorizing, browsing, displaying, and searching files, primarily images and videos. Attributes regarding the files are stored in a schema-less, document-oriented database. Designed to store millions of files. Primary interface is a web front-end designed for use by a web browser.
+A system for importing, storing, categorizing, browsing, displaying, and searching files, primarily images and videos. Attributes regarding the files are stored in a schema-less, document-oriented database. Designed to store millions of files. Primary interface is a web front-end with a simple design suitable for most web browsers.
 
 Yes, another one of these. I am a programmer, it's what I do. I want to learn Erlang and this is a good project with which to learn Erlang and OTP. See the Requirements wiki for additional technical reasons.
 
 ## Current Status
 
-The incoming processor is written in Python, and will eventually be rewritten in Erlang.
-
-The backend application and web interface are being written in Erlang and built using [rebar](https://github.com/rebar/rebar/) and [relx](http://relx.org/).
+The incoming processor is written in [Hy](http://hylang.org), and will eventually be rewritten in Erlang. The backend application and web interface are being written in Erlang and built using [rebar](https://github.com/rebar/rebar/) and [relx](http://relx.org/). There is much yet to be done.
 
 ## Building and Testing
 
@@ -21,10 +19,6 @@ $ ./_rel/tanuki/bin/tanuki-dev
 ```
 
 The web server will be listening on port 8000. Be sure to have a CouchDB instance running.
-
-## TODO
-
-A lot. See the issues and `TODO.md` for pending tasks.
 
 ## Implementation Details
 

@@ -38,10 +38,12 @@ body() ->
 inner_body() ->
     Tag = wf:q(name),
     Rows = tanuki_backend:by_tag(Tag),
-    % TODO: organize the assets by date
     MakeLink = fun(Row) ->
         Id = bitstring_to_list(couchbeam_doc:get_value(<<"id">>, Row)),
-        Label = Tag, % TODO: need to generate a unique label (or a thumbnail)?
+        Values = couchbeam_doc:get_value(<<"value">>, Row),
+        DateString = tanuki_backend:date_list_to_string(hd(Values)),
+        FileName = bitstring_to_list(hd(tl(Values))),
+        Label = io_lib:format("~p - ~p", [FileName, DateString]),
         Url = "/asset?id=" ++ Id,
         [#listitem { body=#link { title=Label, text=Label, url=Url }}]
     end,

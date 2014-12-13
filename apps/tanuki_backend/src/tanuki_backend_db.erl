@@ -50,6 +50,10 @@ handle_call(all_tags, _From, #state{database=Db}=State) ->
     Options = [{group_level, 1}],
     {ok, Rows} = couchbeam_view:fetch(Db, {"assets", "tags"}, Options),
     {reply, Rows, State};
+handle_call({by_checksum, Checksum}, _From, #state{database=Db}=State) ->
+    Options = [{key, list_to_binary(Checksum)}],
+    {ok, Rows} = couchbeam_view:fetch(Db, {"assets", "by_checksum"}, Options),
+    {reply, Rows, State};
 handle_call({by_date, StartDate, EndDate}, _From, #state{database=Db}=State) ->
     Options = [
         {start_key, StartDate},

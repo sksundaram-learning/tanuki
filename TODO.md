@@ -5,25 +5,25 @@
 * Use [concrete](https://github.com/opscode/concrete) for dev-only dependencies
 * Use [PropEr](http://proper.softlab.ntua.gr) for property-based testing
 * Evaluate [QuickCheck](https://github.com/krestenkrab/triq) vs PropEr
+* Look at [Elvis](https://github.com/inaka/elvis) for code style enforcement
 
 ## Web UI
 
-### Getting Started
+### Action Items
 
-1. Code up a front page for an overview of what is stored in tanuki.
-1. Figure out why sync recompiles so much code when index.erl is modified.
+1. The nitrogen static paths (`nitrogen`, `css`) are not working
+    * Viewing the source in Safari shows numerous resource errors
+1. Fetch additional details of the image and display in `asset.erl`
+1. Produce thumbnails for the images and cache them
+1. Display thumbnails of the images in `asset.erl` and `tag.erl`
+1. Make the thumbnail image a link to the full-size image
+1. Organize the assets by date in `tag.erl`
+1. Format the date properly in `tag.erl`
+1. Display available dates (year, then months)
+1. Display assets by date (with pagination?)
 1. Use ETS to cache the tags and such in memory of `tanuki_backend` process.
     * Cache invalidation via couchbeam change listeners.
-1. Look at https://github.com/inaka/elvis for code style enforcement.
-
-### Prototype
-
-1. Connect web front-end to the backend service
-    * Display available tags
-    * Display available dates (year, then months, then days?)
-    * Display assets by tag
-    * Display assets by date (with pagination?)
-    * Display a single asset
+1. Produce thumbnails for the videos and cache them
 
 ### Implementation Details
 
@@ -51,9 +51,3 @@
 
 * Having a `tanuki` user is a good idea for file ownership and permissions.
 * The incoming processor and web stack should run as the tanuki user.
-
-## Backend
-
-### Configuration
-
-Use application environment (defined with `{env [{Key, Val}]}` in `.app.src` file) to indicate the default location of a configuration file.

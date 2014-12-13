@@ -78,6 +78,14 @@ init_dispatch(DocRoot, StaticPaths) ->
     HandlerModule = nitrogen_cowboy,
     HandlerOpts = [],
 
+    %% Serve up the assets from the configured directory, providing a
+    %% function to produce the appropriate mimetype, and a suitable ETag.
+    {ok, AssetsDir} = application:get_env(tanuki_backend, assets_dir),
+    AssetsEntry = {"/assets/[...]", cowboy_static,
+        [{directory, AssetsDir},
+         {mimetypes, {fun tanuki_backend:path_to_mimes/2, default}},
+         {etag, {fun tanuki_backend:generate_etag/2, strong_etag_extra}}]},
+
     %% Start Cowboy...
     %% NOTE: According to Loic, there's no way to pass the buck back to cowboy
     %% to handle static dispatch files so we want to make sure that any large
@@ -86,7 +94,7 @@ init_dispatch(DocRoot, StaticPaths) ->
     %% the static_paths section of cowboy.config
     Dispatch = [
         %% Nitrogen will handle everything that's not handled in the StaticDispatches
-        {'_', StaticDispatches ++ [{'_', HandlerModule , HandlerOpts}]}
+        {'_', StaticDispatches ++ [AssetsEntry, {'_', HandlerModule , HandlerOpts}]}
     ],
     cowboy_router:compile(Dispatch).
 
