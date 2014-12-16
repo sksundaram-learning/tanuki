@@ -240,19 +240,21 @@
   ;
   (with [[fobj (open filename)]]
     (setv content (.read fobj)))
-  (setv msg (MIMEText content))
-  (assoc msg "Subject" "incoming processor report")
-  (setv me "tanuki")
-  (setv you "root")
-  (assoc msg "From" me)
-  (assoc msg "To" you)
-  (try
+  (if (not (empty? content))
     (do
-      (setv server (smtplib.SMTP "localhost"))
-      (.sendmail server me [you] (.as_string msg))
-      (server.quit))
-    (catch [e Exception]
-      (print content))))
+      (setv msg (MIMEText content))
+      (assoc msg "Subject" "incoming processor report")
+      (setv me "tanuki")
+      (setv you "root")
+      (assoc msg "From" me)
+      (assoc msg "To" you)
+      (try
+        (do
+          (setv server (smtplib.SMTP "localhost"))
+          (.sendmail server me [you] (.as_string msg))
+          (server.quit))
+        (catch [e Exception]
+          (print content))))))
 
 (defn revert-all [couch frompath topath]
   ;
