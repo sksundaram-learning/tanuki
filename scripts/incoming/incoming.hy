@@ -136,11 +136,11 @@
               (*logger* (.format "{} => id={}, rev={}" entry doc_id doc_rev))
               (store-asset filepath checksum destpath))]
           [True
-            (*logger* (.format "Ignoring non-file {}" entry))]))
+            (*logger* (.format "Ignoring non-file {}\n" entry))]))
   (*logger* (.format "\n--- done with {}\n" dirpath))
   (if (= (len (os.listdir dirpath)) 0)
     (os.rmdir dirpath)
-    (*logger* (.format "Unable to remove non-empty directory: {}" asset_folder))))
+    (*logger* (.format "Unable to remove non-empty directory: {}\n" asset_folder))))
 
 (defn compute-checksum [filepath]
   ;
@@ -323,12 +323,12 @@
                   (if (in entry *extraneous-files*)
                     ; Remove the superfluous files that Mac OS X likes to create.
                     (os.unlink fullpath)
-                    (*logger* (.format "Ignoring file outside of tagged folder: {}" entry)))]
+                    (*logger* (.format "Ignoring file outside of tagged folder: {}\n" entry)))]
                 [(os.path.isdir fullpath)
                   (if (or args.now (path-old-enough? fullpath))
                     (process-path fullpath db args.dest)
-                    (*logger* (.format "Ignoring new path {} for now..." entry)))]
+                    (*logger* (.format "Ignoring new path {} for now...\n" entry)))]
                 [True
-                  (*logger* (.format "Ignoring mystery object {}" entry))])))
+                  (*logger* (.format "Ignoring mystery object {}\n" entry))])))
       (email-report report_file)
       (os.unlink report_file))))
