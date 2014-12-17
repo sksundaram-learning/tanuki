@@ -90,8 +90,8 @@ install_designs(Db) ->
     % Look for .json files in our private views directory and insert them
     % directly into CouchDB. They are presumed to be our design documents
     % and thus needed for general operation.
-    {ok, PrivPath} = application:get_env(tanuki_backend, priv_path),
-    ViewsDir = filename:join(PrivPath ++ ["priv", "views"]),
+    PrivPath = code:priv_dir(tanuki_backend),
+    ViewsDir = filename:join(PrivPath, "views"),
     InsertDocument = fun(Filename) ->
         Filepath = filename:join([ViewsDir, Filename]),
         {ok, Binary} = file:read_file(Filepath),

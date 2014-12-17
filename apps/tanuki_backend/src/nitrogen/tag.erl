@@ -23,9 +23,8 @@
 -include_lib("nitrogen_core/include/wf.hrl").
 
 main() ->
-    {ok, PrivPath} = application:get_env(tanuki_backend, priv_path),
-    PrivPathStr = filename:join(PrivPath),
-    #template { file=PrivPathStr ++ "/priv/templates/bare.html" }.
+    PrivPath = code:priv_dir(tanuki_backend),
+    #template { file=PrivPath ++ "/templates/bare.html" }.
 
 title() ->
     Tag = wf:q(name),

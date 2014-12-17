@@ -1,5 +1,5 @@
 {application, tanuki_backend, [
-    {description, "Image and video library"},
+    {description, "Digital Asset Management system"},
     {vsn, "0.1.0"},
     {registered, []},
     {applications, [
@@ -17,8 +17,6 @@
     ]},
     {mod, {tanuki_backend_app, []}},
     {env, [
-        % TODO: would be best to have the version inserted during the build
-        {priv_path, [".", "lib", "tanuki_backend-0.1.0"]},
         {couchdb_url, "http://localhost:5984"},
         {database, "tanuki"}
     ]}
