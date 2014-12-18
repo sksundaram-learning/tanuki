@@ -1,5 +1,28 @@
-% TODO: define a new env value based on external configuration file
-[{application, tanuki_backend, [
+%%
+%% Configure the backend, with optional user overrides.
+%%
+%% If a file named user_env.config exists at the base of the application
+%% tree (apps/tanuki_backend) then it will be used to override settings in
+%% the application environment. For example, if that file contained the
+%% following line:
+%%
+%% {assets_dir, "/home/jdoe/test/tanuki"}.
+%%
+%% it would override the assets_dir value in the envionment below.
+%%
+DefaultEnv = [
+    {assets_dir, "/usr/local/var/tanuki/assets"},
+    {couchdb_url, "http://localhost:5984"},
+    {database, "tanuki"}
+].
+AppEnv = case file:consult("user_env.config") of
+    {ok, Terms} ->
+        lists:ukeymerge(1, lists:keysort(1, Terms),  lists:keysort(1, DefaultEnv));
+    {error, enoent} ->
+        DefaultEnv
+    % else, surface the error
+end.
+App = [
     {description, "Digital Asset Management system"},
     {vsn, "0.1.0"},
     {registered, []},
@@ -17,8 +40,6 @@
         couchbeam
     ]},
     {mod, {tanuki_backend_app, []}},
-    {env, [
-        {couchdb_url, "http://localhost:5984"},
-        {database, "tanuki"}
-    ]}
-]}].
+    {env, AppEnv}
+].
+[{application, tanuki_backend, App}].

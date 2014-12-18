@@ -10,21 +10,6 @@
 
 ### Getting Started
 
-1. Figure out how to have a development and a release build
-    * i.e. build based on some configuration that can differ for dev and release
-    * Need a path to stored assets that differs for development and production
-    * Can use `-Application Par Val` option to `erl` to set application parameters
-    * the `.app.src` file can be an `.app.src.script`!
-        * The `.script` could consult a properties file (ala Apache Ant)
-    * rebar supports something called an `app_vars_file` when processing `.app.src`
-    * See https://github.com/rebar/rebar/wiki/Dynamic-configuration for an example that uses `os:getenv` in a `rebar.config.script` to base actions on environment variables
-    * Could use a combination of Makefile setting envars and `rebar.config.script`
-1. Dynamic versions in configuration files (e.g. `.app.src`)
-    * See https://github.com/rebar/rebar/wiki/Processing-versions-in-configuration-files
-    * Or just write a `.app.src.script` that uses envars to set the version
-1. Define configuration for knowing where the assets are stored on the system
-1. Can have `sys.config` include a named file
-    * See http://aerosol.github.io/anxibits/little-known-fact-about-erlang-sys-config/
 1. Code up a front page for an overview of what is stored in tanuki.
 1. Figure out why sync recompiles so much code when index.erl is modified.
 1. Use ETS to cache the tags and such in memory of `tanuki_backend` process.
