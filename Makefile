@@ -4,6 +4,7 @@ clean:
 	rebar -r clean skip_deps=true
 
 compile:
+	$(MAKE) -C apps/tanuki_backend copy-static
 	rebar -r compile skip_deps=true
 
 eunit: compile

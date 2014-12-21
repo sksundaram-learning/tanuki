@@ -11,10 +11,10 @@
 
 ### Action Items
 
-1. The nitrogen static paths (`nitrogen`, `css`) are not working
-    * Viewing the source in Safari shows numerous resource errors
 1. Fetch additional details of the image and display in `asset.erl`
 1. Produce thumbnails for the images and cache them
+    * https://github.com/kivra/emagick
+    * https://github.com/mokele/eim
 1. Display thumbnails of the images in `asset.erl` and `tag.erl`
 1. Make the thumbnail image a link to the full-size image
 1. Organize the assets by date in `tag.erl`

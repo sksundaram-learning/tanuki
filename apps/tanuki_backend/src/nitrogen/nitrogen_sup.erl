@@ -50,8 +50,9 @@ init([]) ->
     {ok, DocRoot} = application:get_env(cowboy, document_root),
     {ok, StaticPaths} = application:get_env(cowboy, static_paths),
 
-    PrivPath = code:priv_dir(tanuki_backend),
-    DocRoot2 = filename:join(PrivPath, DocRoot),
+    % the document_root value already has 'priv' so use priv_dir parent
+    PrivParent = filename:dirname(code:priv_dir(tanuki_backend)),
+    DocRoot2 = filename:join(PrivParent, DocRoot),
     io:format("Starting Cowboy Server (~s) on ~s:~p, root: '~s'~n",
               [ServerName, BindAddress, Port, DocRoot2]),
 
